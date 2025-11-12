@@ -26,7 +26,7 @@ public class E2E extends BaseTest {
     @Test
     public void submitSpaInOneMAC() {
         //Create SPA in OneMAC
-      /*  getDriver().get(ConfigReader.get("oneMACDev"));
+        getDriver().get(ConfigReader.get("oneMACDev"));
         String spaId = SpaIdGenerator.nextSpa("MD", "25");
         LoginPage loginPage = new LoginPage(getDriver(), getUtils());
         logger.info("Signing in to OneMAC as a state user...");
@@ -45,8 +45,13 @@ public class E2E extends BaseTest {
         if (PageFactory.getSubmitMedicaidSpaPage(getDriver(), getUtils()).isSubmitted()) {
             logger.info("Successfully submitted Spa: " + spaId + " in OneMAC.");
             ExcelPackageTracker.appendNewPackage("SPA", "MD", "Medicaid SPA", "", spaId, "Submitted", "");
-        }*/
-
+        }
+        getDriver().get(ConfigReader.get("seaDEV"));
+        StateEarlyAlertPage stateEarlyAlertPage = PageFactory.getStateEarlyAlertPage(getDriver(), getUtils());
+        stateEarlyAlertPage.login(ConfigReader.getSEAUsername("seaUsername"), ConfigReader.getSEAPassword("seaPassword"));
+        // SpaPackage spaPackage = ExcelPackageSelector.selectSubmittedPA("MD", "Medicaid SPA");
+        stateEarlyAlertPage.createPackage(spaId, "11/12/2025", "11/12/2025");
+        logger.info("Successfully submitted Spa: " + spaId + " in SEATool.");
     }
 
     @Test
