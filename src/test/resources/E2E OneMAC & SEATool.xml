@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+<suite name="E2E OneMAC SEATool" verbose="1" parallel="false">
+
+    <test name="E2E OneMAC SEATool">
+        <classes>
+            <class name="gov.cms.onemac.tests.E2E"/>
+        </classes>
+    </test>
+    <listeners>
+        <listener class-name="gov.cms.onemac.testutils.TestListener"/>
+    </listeners>
+
+</suite>

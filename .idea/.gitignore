@@ -1,0 +1,16 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+target/
+chrome-win64/
+*.dll
+
+# IntelliJ project files
+.idea/
+*.iml
+out/
+
+# Test reports and screenshots
+reports/
+screenshots/
