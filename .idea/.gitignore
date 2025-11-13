@@ -1,16 +1,28 @@
-# Default ignored files
-/shelf/
-/workspace.xml
-
-target/
-chrome-win64/
-*.dll
-
-# IntelliJ project files
+#############################
+# IDEA / IntelliJ Project Files
+#############################
 .idea/
 *.iml
 out/
+shelf/
+workspace.xml
 
-# Test reports and screenshots
+#############################
+# Maven build output
+#############################
+target/
+
+#############################
+# Local Browser Binaries (ChromeDriver, Chrome portable, GeckoDriver, etc.)
+#############################
+chrome-win64/
+*.dll
+*.exe
+
+#############################
+# Test Output
+#############################
 reports/
+extent-report/
 screenshots/
+logs/
