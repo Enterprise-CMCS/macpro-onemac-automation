@@ -1,4 +1,4 @@
-# OneMAC Automation Tests
+# OneMAC Automation Framework
 
 This repository contains **OneMAC** automation scripts for the OneMAC application, featuring **ExtentReports** for clear reporting. **GitHub Actions** is configured to run the tests in CI/CD pipelines.
 
@@ -8,62 +8,56 @@ The OneMAC Automation framework leverages **Selenium WebDriver** and **TestNG** 
 ## Directory Structure
 ```text
 OneMAC-Automation/
-├── .github/  
-│   └── *GitHub workflows and automation scripts*  
+├── .github/
+│   └── workflows/               # GitHub Actions CI pipelines
 │
-├── .idea/  
-│   └── *IntelliJ project settings*  
-│
-├── extent-report/  
-│   └── *Extent test reports generated after execution*  
-│
-├── logs/  
-│   └── *Execution logs*  
+├── extent-report/               # Extent HTML reports + screenshots
+├── logs/                        # Test execution logs
 │
 ├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── gov/
-│   │           └── cms/
-│   │               └── onemac/
-│   │                   ├── pages/
-│   │                   │   ├── Dashboard.java
-│   │                   │   └── LoginPage.java
-│   │                   │
-│   │                   └── utils/
-│   │                       ├── ConfigReader.java
-│   │                       ├── DriverFactory.java
-│   │                       ├── ExtentReportManager.java
-│   │                       ├── LogHelper.java
-│   │                       ├── PageFactory.java
-│   │                       ├── ScreenshotUtil.java
-│   │                       └── UIElementUtils.java
-│
-│   ├── test/
-│   │   └── java/
-│   │       └── gov/
-│   │           └── cms/
-│   │               └── onemac/
-│   │                   ├── base/
-│   │                   │   └── BaseTest.java
-│   │                   │
-│   │                   ├── tests/
-│   │                   │   ├── AuthenticationTests.java
-│   │                   │   └── DashboardUIElementsTests.java
-│   │                   │
-│   │                   └── utils/
-│   │                       └── TestListener.java
-│
+│   ├── main/java/gov/cms/onemac/
+│   │   ├── pages/               # Page Object Model (POM)
+│   │   │   ├── LoginPage.java
+│   │   │   ├── DashboardPage.java
+│   │   │   ├── SubmitMedicaidSpaPage.java
+│   │   │   ├── WaiverSubmissionPages...
+│   │   │
+│   │   ├── models/              # SPA & Waiver POJOs
+│   │   │   ├── BasePackage.java
+│   │   │   ├── SpaPackage.java
+│   │   │   └── WaiverPackage.java
+│   │   │
+│   │   └── utils/               # Framework utilities
+│   │       ├── DriverFactory.java
+│   │       ├── ConfigReader.java
+│   │       ├── PageFactory.java
+│   │       ├── UIElementUtils.java
+│   │       ├── SpaIdGenerator.java
+│   │       ├── WaiverIdGenerator.java
+│   │       ├── StateCounterTracker.java
+│   │       ├── ExcelPackageTracker.java
+│   │       ├── ExcelPackageSelector.java
+│   │       └── ScreenshotUtil.java
+│   │
+│   ├── test/java/gov/cms/onemac/
+│   │   ├── base/
+│   │   │   └── BaseTest.java
+│   │   ├── tests/
+│   │   │   ├── AuthenticationTests.java
+│   │   │   └── DynamicWaiverTests.java
+│   │   └── utils/
+│   │       ├── TestListener.java
+│   │       └── PackagePoolGenerator.java
+│   │
 │   └── resources/
 │       ├── config.properties
 │       ├── log4j2.xml
-│       └── testng.xml
-│
-├── target/  
-│   └── *Compiled classes, reports, and temporary files*  
+│       ├── packages.xlsx               # Generated test data (SPA + Waivers)
+│       └── state_counters.xlsx         # Controlled increment for each state
 │
 ├── pom.xml
 └── README.md
+
 
 ```
 ## 1. Prerequisites

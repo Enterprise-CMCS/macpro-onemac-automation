@@ -41,7 +41,6 @@ public class BaseTest {
     }
 
 
-
     public UIElementUtils getUtils() {
         return utils;
     }

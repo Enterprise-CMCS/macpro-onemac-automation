@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class ConfigReader {
+
     private static Properties properties;
 
-    public static Properties getProperties() {
+    private static Properties getProperties() {
         if (properties == null) {
             properties = new Properties();
             try {
@@ -20,24 +21,37 @@ public class ConfigReader {
         return properties;
     }
 
+    /**
+     * Reads a config value with ENV override.
+     * If ENV var exists → use it
+     * Otherwise → use config.properties
+     */
     public static String get(String key) {
+        // 1. Check environment variables (preferred)
+        String envValue = System.getenv(key.toUpperCase().replace(".", "_"));
+        if (envValue != null && !envValue.isEmpty()) {
+            return envValue;
+        }
+
+        // 2. Fallback to config.properties
         return getProperties().getProperty(key);
     }
 
+    /**
+     * Retrieve username for user type (cms, state, seatool…)
+     * ENV example: CMS_USERNAME, STATE_USERNAME
+     * config.properties example: cms.username
+     */
     public static String getUsername(String userType) {
         return get(userType + ".username");
     }
 
+    /**
+     * Retrieve password for user type
+     * ENV example: CMS_PASSWORD
+     * config.properties example: cms.password
+     */
     public static String getPassword(String userType) {
         return get(userType + ".password");
     }
-
-    public static String getSEAUsername(String username) {
-        return get(username);
-    }
-
-    public static String getSEAPassword(String password) {
-        return get(password);
-    }
-
 }

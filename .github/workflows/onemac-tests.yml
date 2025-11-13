@@ -9,6 +9,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      STATE_USERNAME: ${{ secrets.STATE_USERNAME }}
+      STATE_PASSWORD: ${{ secrets.STATE_PASSWORD }}
+      CMS_USERNAME: ${{ secrets.CMS_USERNAME }}
+      CMS_PASSWORD: ${{ secrets.CMS_PASSWORD }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
