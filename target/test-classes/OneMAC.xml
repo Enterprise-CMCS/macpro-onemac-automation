@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="OneMAC">
+    <test name="Login">
+        <classes>
+            <class name="gov.cms.onemac.tests.AuthenticationTests"/>
+        </classes>
+    </test>
+    <listeners>
+        <listener class-name="gov.cms.onemac.testutils.TestListener"/>
+    </listeners>
+</suite>
