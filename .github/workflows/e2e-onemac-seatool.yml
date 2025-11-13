@@ -7,7 +7,15 @@ on:
 
 jobs:
   e2e-tests:
-    runs-on: [ self-hosted, Windows, X64, e2e ]  # Runner should be labeled as "e2e"
+    runs-on: [ self-hosted, Windows, X64, e2e ]
+
+    env:
+      STATE_USERNAME: ${{ secrets.STATE_USERNAME }}
+      STATE_PASSWORD: ${{ secrets.STATE_PASSWORD }}
+      CMS_USERNAME: ${{ secrets.CMS_USERNAME }}
+      CMS_PASSWORD: ${{ secrets.CMS_PASSWORD }}
+      SEA_USERNAME: ${{ secrets.CMS_USERNAME }}
+      SEA_PASSWORD: ${{ secrets.CMS_PASSWORD }}
 
     steps:
       - name: Checkout repository
@@ -36,9 +44,6 @@ jobs:
 
           Add-Content -Path $env:GITHUB_ENV -Value "BROWSER=$browser"
           Add-Content -Path $env:GITHUB_ENV -Value "HEADLESS=$headless"
-
-          Write-Host "Browser set to: $browser"
-          Write-Host "Headless mode: $headless"
 
       - name: Run E2E Suite (OneMAC + SEATool)
         shell: powershell

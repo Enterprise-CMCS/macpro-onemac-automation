@@ -45,13 +45,13 @@ public class E2E extends BaseTest {
         if (PageFactory.getSubmitMedicaidSpaPage(getDriver(), getUtils()).isSubmitted()) {
             logger.info("Successfully submitted Spa: " + spaId + " in OneMAC.");
             ExcelPackageTracker.appendNewPackage("SPA", "MD", "Medicaid SPA", "", spaId, "Submitted", "");
-        }
+        }*/
         getDriver().get(ConfigReader.get("seaDEV"));
         StateEarlyAlertPage stateEarlyAlertPage = PageFactory.getStateEarlyAlertPage(getDriver(), getUtils());
-        stateEarlyAlertPage.login(ConfigReader.get("seaUsername"), ConfigReader.get("seaPassword"));
+        stateEarlyAlertPage.login(ConfigReader.getUsername("sea"), ConfigReader.getPassword("sea"));
         // SpaPackage spaPackage = ExcelPackageSelector.selectSubmittedPA("MD", "Medicaid SPA");
-        stateEarlyAlertPage.createPackage(spaId, "11/12/2025", "11/12/2025");
-        logger.info("Successfully submitted Spa: " + spaId + " in SEATool.");*/
+       // stateEarlyAlertPage.createPackage(spaId, "11/12/2025", "11/12/2025");
+     //   logger.info("Successfully submitted Spa: " + spaId + " in SEATool.");
     }
 
     @Test
