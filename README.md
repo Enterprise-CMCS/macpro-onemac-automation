@@ -189,9 +189,9 @@ headless=true
 
 Clone the repository to your local machine:
 
-`git clone https://github.com/jad248/onemac-automation.git`
+`git clone https://github.com/Enterprise-CMCS/macpro-onemac-automation.git`
 
-`cd onemac-automation`
+`cd OneMAC-Automation`
 
 ## 8. Running Tests Locally
 
@@ -243,7 +243,7 @@ Run tests using Maven:
 
 **Creating/Updating Workflows**
 
-* `.github/workflows/selenium-testng.yml` defines the CI workflow.
+* `.github/workflows/e2e-onemac-seatool.yml` or `.github/workflows/onemac-tests.yml`  defines the CI workflow.
 
 * Any changes to workflow files require a PAT with workflow scope.
 
