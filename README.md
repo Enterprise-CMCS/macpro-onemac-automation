@@ -168,7 +168,7 @@ Before running the tests, make sure you have the following installed:
 * **Git**
 * Chrome or Firefox (for local runs)
 
-## 2. Configuration: Browser and Headless Mode
+## 6. Configuration: Browser and Headless Mode
 
 The browser and headless mode are configured in the `config.properties` file located at:
 
@@ -185,7 +185,7 @@ headless=true
 
 * headless can be true or false
 
-## 3. Clone Repository
+## 7. Clone Repository
 
 Clone the repository to your local machine:
 
@@ -193,7 +193,7 @@ Clone the repository to your local machine:
 
 `cd onemac-automation`
 
-## 4. Running Tests Locally
+## 8. Running Tests Locally
 
 Run tests using Maven:
 
@@ -205,7 +205,7 @@ Run tests using Maven:
 
 * Screenshots of failures will be saved in extent-report/screenshots/.
 
-## 5. GitHub Actions (CI)
+## 9. GitHub Actions (CI)
 
 * Workflow is defined in .github/workflows/e2e-onemac-seatool.yml or onemac-tests.yml.
 
@@ -221,7 +221,7 @@ Run tests using Maven:
 
 **Note:** For stability, Chrome is recommended on CI.
 
-## 6. Reports
+## 10. Reports
 
 * ExtentReports are generated at: `extent-report/OneMACTestReport.html`
 
@@ -229,7 +229,7 @@ Run tests using Maven:
 
 * Reports are uploaded as artifacts in GitHub Actions for each workflow run.
 
-## 7. Git Operations
+## 11. Git Operations
 
 **Adding Changes**
 
@@ -247,7 +247,7 @@ Run tests using Maven:
 
 * Any changes to workflow files require a PAT with workflow scope.
 
-## 8. Troubleshooting
+## 12. Troubleshooting
 
 * **SessionNotCreatedException / Marionette errors:**
 
@@ -285,7 +285,7 @@ Use the browser specified in `config.properties` and pass it as a system propert
 
 mvn clean test -Dbrowser=firefox -Dheadless=true
 
-## 9. Writing Tests (Example)
+## 13. Writing Tests (Example)
 
 **Creating a SPA**
 ```properties
@@ -312,7 +312,7 @@ ExcelPackageTracker.appendNewPackage(
 SpaPackage spa = ExcelPackageSelector.selectRandomSPA("MD", "Medicaid SPA");
 ```
 
-## 10. Additional Notes
+## 14. Additional Notes
 
 * Keep `config.properties` updated for headless or browser preferences.
 
