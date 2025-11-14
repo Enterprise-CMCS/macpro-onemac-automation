@@ -50,7 +50,6 @@ public class E2E extends BaseTest {
         StateEarlyAlertPage stateEarlyAlertPage = PageFactory.getStateEarlyAlertPage(getDriver(), getUtils());
         stateEarlyAlertPage.login(ConfigReader.getUsername("sea"), ConfigReader.getPassword("sea"));
          SpaPackage spaPackage = ExcelPackageSelector.selectSubmittedPA("MD", "Medicaid SPA");
-        System.out.println(spaPackage);
        // stateEarlyAlertPage.createPackage(spaId, "11/12/2025", "11/12/2025");
      //   logger.info("Successfully submitted Spa: " + spaId + " in SEATool.");
     }

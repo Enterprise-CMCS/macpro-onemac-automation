@@ -1,11 +1,45 @@
 # OneMAC Automation Framework
 
-This repository contains **OneMAC** automation scripts for the OneMAC application, featuring **ExtentReports** for clear reporting. **GitHub Actions** is configured to run the tests in CI/CD pipelines.
+This repository contains the **UI Automation Framework for the OneMAC application**, built using **Selenium WebDriver,
+TestNG,** and **Page Object Model (POM).**
+The framework is **data-driven**, supports dynamic package ID generation, maintains **Excel-based test data pools**, and
+integrates with **GitHub Actions CI/CD.**
 
-## Framework Overview
-The OneMAC Automation framework leverages **Selenium WebDriver** and **TestNG** to perform end-to-end UI testing of the OneMAC application. It uses a **modular, data-driven structure**, where configuration parameters such as browser type, headless mode, and environment settings are maintained in `config.properties`. Test execution is managed via **Maven**, with **ExtentReports** providing rich, HTML-based reports and failure screenshots. Continuous Integration is handled through **GitHub Actions**, enabling automated test runs on schedule or when changes are pushed to the repository.
+## 1. Framework Overview
 
-## Directory Structure
+The OneMAC Automation Framework automates SPA and Waiver workflows for the OneMAC System.
+It is built for:
+
+* Cross-browser UI testing
+
+* End-to-end workflows (OneMAC ↔ Seatool)
+
+* Dynamic package number generation using:
+
+    * `state_counters.xlsx`
+
+    * `packages.xlsx`
+
+* **Data-driven testing** using Excel-backed selectors
+
+* **Reusable page objects**
+
+* **Rich reporting** using ExtentReports
+
+* **Scheduled and on-push GitHub Actions pipelines**
+
+The framework is structured by purpose, not UI layout - every package contains code responsible for a single job:
+
+* `pages/` → UI interaction
+
+* `models/` → Data objects for SPA/Waiver
+
+* `utils/` → Excel trackers, ID generators, driver utilities
+
+* `tests/` → Actual test scenarios
+
+## 2. Project Structure
+
 ```text
 OneMAC-Automation/
 ├── .github/
@@ -60,7 +94,72 @@ OneMAC-Automation/
 
 
 ```
-## 1. Prerequisites
+
+Resources:
+
+```
+src/test/resources/
+├── config.properties
+├── packages.xlsx
+├── state_counters.xlsx
+└── log4j2.xml
+```
+
+## 3. Package ID Management (SPA, Waivers, TE, Amendments)
+
+The framework generates realistic, CMS-compliant IDs using:
+
+`state_counters.xlsx`
+
+Tracks last used numbers per state:
+
+```
+State | SPA_Last | Waiver_Last | Renewal_Last | Amendment_Last | TE_Last
+MD    | 9025     | 2212        | 1            | 3              | 2
+```
+
+`packages.xlsx`
+
+Stores every SPA, Waiver, Amendment, and TE created during automation:
+
+```
+PackageType | State | Authority | ActionType | PackageID       | Status | ParentID
+SPA         | MD    | Medicaid   | ""         | MD-25-9001      | ""     |
+Waiver      | MD    | 1915(b)    | Initial    | MD-2200.R00.00  | ""     |
+Waiver      | MD    | 1915(b)    | Renewal    | MD-2200.R01.00  | ""     | MD-2200.R00.00
+Waiver      | MD    | 1915(b)    | Temp Ext   | MD-2200.R01.TE01| ""     | MD-2200.R01.00
+```
+
+**ID Generator Responsibilities**
+
+| Class                    | Responsibility                                |
+|--------------------------|-----------------------------------------------|
+| **SpaIdGenerator**       | Generates next SPA ID using state counters    |
+| **WaiverIdGenerator**    | Generates Initial, Renewal, Amendment, TE IDs |
+| **ExcelPackageTracker**  | Writes new packages + updates status          |
+| **ExcelPackageSelector** | Picks existing packages for new tests         |
+
+## 4. Dynamic Package Pool (Auto-Generate Test Data)
+
+The method below creates a fresh batch of SPA and Waiver test data:
+
+```
+PackagePoolGenerator.generate(List.of("MD", "CO", "AL", "NY"));
+```
+
+This populates:
+
+* **6 SPAs per state**
+
+* **6 Initial Waivers per state**
+
+IDs are stored in:
+
+`packages.xlsx`
+
+`state_counters.xlsx`
+
+## 5. Prerequisites
 
 Before running the tests, make sure you have the following installed:
 
@@ -68,8 +167,6 @@ Before running the tests, make sure you have the following installed:
 * **Maven**
 * **Git**
 * Chrome or Firefox (for local runs)
-
-
 
 ## 2. Configuration: Browser and Headless Mode
 
@@ -83,6 +180,7 @@ The browser and headless mode are configured in the `config.properties` file loc
 browser=chrome
 headless=true
 ```
+
 * browser can be chrome or firefox
 
 * headless can be true or false
@@ -101,26 +199,25 @@ Run tests using Maven:
 
 `mvn clean test`
 
-
 * The browser and headless settings are taken from config.properties.
 
-* ExtentReports will be generated in extent-report/.
+* ExtentReports will be generated in extent-report/ only when running test suite from xml files located under resources directory.
 
 * Screenshots of failures will be saved in extent-report/screenshots/.
 
 ## 5. GitHub Actions (CI)
 
-* Workflow is defined in .github/workflows/selenium-testng.yml.
+* Workflow is defined in .github/workflows/e2e-onemac-seatool.yml or onemac-tests.yml.
 
 * On push to main or manual trigger, GitHub Actions will:
 
-  * Set up Java 17
+    * Set up Java 17
 
-  * Install Chrome (or Firefox if configured)
+    * Install Chrome (or Firefox if configured)
 
-  * Run Maven tests
+    * Run Maven tests
 
-  * Upload ExtentReports and screenshots as artifacts
+    * Upload ExtentReports and screenshots as artifacts
 
 **Note:** For stability, Chrome is recommended on CI.
 
@@ -134,14 +231,13 @@ Run tests using Maven:
 
 ## 7. Git Operations
 
-   **Adding Changes**
+**Adding Changes**
 
-   `git add .`
+`git add .`
 
-   `git commit -m "Your commit message"`
+`git commit -m "Your commit message"`
 
-  `git push origin main`
-
+`git push origin main`
 
 * Ensure your Personal Access Token (PAT) is set up for GitHub authentication.
 
@@ -155,10 +251,10 @@ Run tests using Maven:
 
 * **SessionNotCreatedException / Marionette errors:**
 
-  * Ensure the Firefox or Chrome driver version matches the browser version.
+    * Ensure the Firefox or Chrome driver version matches the browser version.
 
-  * Headless mode arguments for CI:
-  
+    * Headless mode arguments for CI:
+
 ```properties
 --headless=new
 --width=1920
@@ -171,17 +267,17 @@ Run tests using Maven:
 
 * **Browser installed incorrectly on CI:**
 
-  * Firefox may fail on Linux runners; Chrome is recommended.
+    * Firefox may fail on Linux runners; Chrome is recommended.
 
 * **SLF4J warnings:**
 
-  * These are logging warnings and can be ignored unless logging is required.
+    * These are logging warnings and can be ignored unless logging is required.
 
 * **ExtentReports not uploading:**
 
-  * Make sure `path` in `upload-artifact` action matches `extent-report/**` and `extent-report/screenshots/**`.
+    * Make sure `path` in `upload-artifact` action matches `extent-report/**` and `extent-report/screenshots/**`.
 
-  * Ensure if: `always()` is used in workflow step to upload reports even on test failures.
+    * Ensure if: `always()` is used in workflow step to upload reports even on test failures.
 
 * **Running a single browser:**
 
@@ -189,7 +285,34 @@ Use the browser specified in `config.properties` and pass it as a system propert
 
 mvn clean test -Dbrowser=firefox -Dheadless=true
 
-## 9. Additional Notes
+## 9. Writing Tests (Example)
+
+**Creating a SPA**
+```properties
+String spaId = SpaIdGenerator.nextSpa("MD", "25");
+
+ExcelPackageTracker.appendNewPackage(
+"SPA", "MD", "Medicaid SPA", "", spaId, "", ""
+);
+```
+**Creating a Renewal**
+```properties
+WaiverPackage parent = ExcelPackageSelector.selectApprovedInitial("MD", "1915(b)");
+String renewalId = WaiverIdGenerator.nextRenewal(parent.getPackageId(),
+                     ExcelPackageTracker.readAllIds("MD"));
+
+ExcelPackageTracker.appendNewPackage(
+    "Waiver", parent.getState(), parent.getAuthority(),
+    "Renewal", renewalId, "", parent.getPackageId()
+);
+```
+**Selecting an Unapproved SPA**
+
+```properties
+SpaPackage spa = ExcelPackageSelector.selectRandomSPA("MD", "Medicaid SPA");
+```
+
+## 10. Additional Notes
 
 * Keep `config.properties` updated for headless or browser preferences.
 
