@@ -23,7 +23,7 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.10.0</version>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.github.bonigarcia</groupId>

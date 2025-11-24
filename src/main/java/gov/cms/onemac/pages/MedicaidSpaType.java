@@ -10,6 +10,8 @@ public class MedicaidSpaType {
     private WebDriver driver;
     private UIElementUtils utils;
 
+
+
     public MedicaidSpaType(WebDriver driver, UIElementUtils utils) {
         this.driver = driver;
         this.utils = utils;

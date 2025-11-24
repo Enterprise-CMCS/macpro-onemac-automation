@@ -9,17 +9,18 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 
 public class DriverFactory {
 
-        public static WebDriver createDriver() {
-            // Read system properties first (from GitHub Actions), fallback to ConfigReader
-         /*   System.setProperty("webdriver.http.factory", "jdk-http-client");
-            System.setProperty("webdriver.chrome.driver", "C:\\Users\\57901\\Downloads\\OneMAC-Automation\\OneMAC-Automation\\src\\test\\resources\\chromedriver\\chromedriver.exe");
-            WebDriver driver;
-            ChromeOptions chromeOptions;
-            chromeOptions = new ChromeOptions();
-            chromeOptions.addArguments("--headless=new");
-            chromeOptions.addArguments("--window-size=1920,1080");
-            chromeOptions.setBinary ("C:\\Users\\57901\\Downloads\\OneMAC-Automation\\OneMAC-Automation\\src\\test\\resources\\chrome-win64\\chrome.exe");
-            driver = new ChromeDriver(chromeOptions);*/
+    public static WebDriver createDriver() {
+        // Read system properties first (from GitHub Actions), fallback to ConfigReader
+       /* System.setProperty("webdriver.http.factory", "jdk-http-client");
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\57901\\Desktop\\chromedriver\\chromedriver\\chromedriver.exe");
+        WebDriver driver;
+        ChromeOptions chromeOptions;
+        chromeOptions = new ChromeOptions();
+         //chromeOptions.addArguments("--headless=new");
+        // chromeOptions.addArguments("--window-size=1920,1080");
+       chromeOptions.addArguments("--start-maximized");
+        chromeOptions.setBinary("C:\\Users\\57901\\Desktop\\chrome-win64\\chrome-win64\\chrome.exe");
+        driver = new ChromeDriver(chromeOptions);*/
             String browser = System.getProperty("browser");
             if (browser == null || browser.isEmpty()) {
                 browser = ConfigReader.get("browser");
@@ -69,7 +70,7 @@ public class DriverFactory {
                     throw new IllegalArgumentException("Unsupported browser: " + browser);
             }
 
-            return driver;
-        }
+        return driver;
+    }
 
 }

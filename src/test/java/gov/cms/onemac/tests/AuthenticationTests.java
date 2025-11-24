@@ -1,9 +1,9 @@
 package gov.cms.onemac.tests;
 
 import gov.cms.onemac.base.BaseTest;
-import org.testng.annotations.Test;
 import gov.cms.onemac.pages.LoginPage;
 import gov.cms.onemac.utils.ConfigReader;
+import org.testng.annotations.Test;
 
 
 public class AuthenticationTests extends BaseTest {

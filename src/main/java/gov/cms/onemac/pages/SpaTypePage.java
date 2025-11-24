@@ -8,7 +8,6 @@ public class SpaTypePage {
 
     private WebDriver driver;
     private UIElementUtils utils;
-
     private By medicaidSPA = By.xpath("//p[text()=\"Submit a new Medicaid State Plan Amendment\"]/ancestor::a");
 
     public SpaTypePage(WebDriver driver, UIElementUtils utils) {

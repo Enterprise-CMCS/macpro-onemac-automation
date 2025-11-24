@@ -1,8 +1,8 @@
 package gov.cms.onemac.testutils;
 
-import gov.cms.onemac.base.BaseTest;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
+import gov.cms.onemac.base.BaseTest;
 import gov.cms.onemac.utils.ExtentReportManager;
 import gov.cms.onemac.utils.ScreenshotUtil;
 import org.testng.ITestContext;

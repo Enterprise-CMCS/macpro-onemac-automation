@@ -7,6 +7,7 @@ import org.openqa.selenium.WebDriver;
 public class SubmissionTypePage {
     private UIElementUtils utils;
     private WebDriver driver;
+
     private By statePlanAmendment = By.xpath("//h2[text()=\"State Plan Amendment (SPA)\"]/ancestor::a");
 
 

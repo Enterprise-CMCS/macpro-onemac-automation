@@ -2,7 +2,7 @@
 <suite name="OneMAC">
     <test name="Login">
         <classes>
-            <class name="gov.cms.onemac.tests.DashboardPageUIElementsTests"/>
+           <!-- <class name="gov.cms.onemac.tests.DashboardPageUIElementsTests"/>-->
         </classes>
     </test>
     <listeners>

@@ -13,11 +13,16 @@ public class PageFactory {
         return new LoginPage(driver, utils);
     }
 
-    public static StateEarlyAlertPage getStateEarlyAlertPage(WebDriver driver, UIElementUtils utils) {
-        return new StateEarlyAlertPage(driver, utils);
+    public static StateEarlyAlert getStateEarlyAlertPage(WebDriver driver, UIElementUtils utils) {
+        return new StateEarlyAlert(driver, utils);
     }
 
     public static SubmitMedicaidSpaPage getSubmitMedicaidSpaPage(WebDriver driver, UIElementUtils uiElementUtils) {
         return new SubmitMedicaidSpaPage(driver, uiElementUtils);
     }
+
+    public static HomePage getHomePage(WebDriver driver, UIElementUtils uiElementUtils) {
+        return new HomePage(driver, uiElementUtils);
+    }
+
 }
