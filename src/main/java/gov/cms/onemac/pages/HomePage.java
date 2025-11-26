@@ -10,9 +10,9 @@ public class HomePage {
     private UIElementUtils utils;
 
     // Locators
-    private By searchSPA = By.cssSelector("input[aria-label=\"Search for text\"]");
+    private By searchPackage = By.cssSelector("input[aria-label=\"Search for text\"]");
     private By searchButton = By.xpath("//button[text()=\"Search\"]");
-
+    private By waivers = By.cssSelector("button[value=\"waivers\"]");
 
     public HomePage(WebDriver driver, UIElementUtils utils) {
         this.driver = driver;
@@ -20,11 +20,16 @@ public class HomePage {
     }
 
     public DashboardPage searchSpaPackage(String spaID) {
-        utils.sendKeys(searchSPA, spaID);
+        utils.sendKeys(searchPackage, spaID);
         utils.clickElement(searchButton);
         return new DashboardPage(driver, utils);
     }
 
 
-
+    public DashboardPage searchWaiver(String waiver) {
+        utils.clickElement(waivers);
+        utils.sendKeys(searchPackage, waiver);
+        utils.clickElement(searchButton);
+        return new DashboardPage(driver, utils);
+    }
 }

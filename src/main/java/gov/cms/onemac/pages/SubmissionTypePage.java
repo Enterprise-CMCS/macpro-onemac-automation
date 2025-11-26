@@ -9,6 +9,8 @@ public class SubmissionTypePage {
     private WebDriver driver;
 
     private By statePlanAmendment = By.xpath("//h2[text()=\"State Plan Amendment (SPA)\"]/ancestor::a");
+    private By waiverAction  = By.xpath("//h2[text()=\"Waiver Action\"]/ancestor::a");
+
 
 
     public SubmissionTypePage(WebDriver driver, UIElementUtils utils) {
@@ -21,5 +23,8 @@ public class SubmissionTypePage {
         return new SpaTypePage(driver, utils);
     }
 
-
+    public WaiverType selectWaiverAction() {
+        utils.clickElement(waiverAction);
+        return new WaiverType(driver, utils);
+    }
 }

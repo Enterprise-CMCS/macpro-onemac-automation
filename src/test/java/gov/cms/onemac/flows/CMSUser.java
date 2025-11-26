@@ -10,6 +10,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class CMSUser {
+
+    private By statusPendingApproval = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Pending - Approval']");
+    private By statusPendingConcurrence = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Pending - Concurrence']");
     private By raiWithdrawalRequested = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Formal RAI Response - Withdrawal Requested']");
     private By raiResponseWithdraw = By.linkText("Enable Formal RAI Response Withdraw");
     private By pendingRAI = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Pending - RAI']");
@@ -42,6 +45,19 @@ public class CMSUser {
 
     }
 
+    public void openWaiverPackage(String waiver) {
+        PageFactory.getDashboardPage(driver, utils)
+                .openWaiver(waiver);
+    }
+
+    public boolean isPackageStatusPendingConcurrence() {
+        return utils.refreshUntilVisible(statusPendingConcurrence, TIME_OUT);
+    }
+
+    public boolean isPackageStatusPendingApproval() {
+        return utils.refreshUntilVisible(statusPendingApproval, TIME_OUT);
+    }
+
     public boolean isPackageStatusPending() {
         return utils.refreshUntilVisible(pending, TIME_OUT);
     }
@@ -67,7 +83,7 @@ public class CMSUser {
     }
 
     public void enableRAIResponseWithdraw() {
-      PageFactory.getDashboardPage(driver,utils).enableFormalRAIResponseWithdraw();
+        PageFactory.getDashboardPage(driver, utils).enableFormalRAIResponseWithdraw();
     }
 
     public boolean isStatusUpdatedToFormalRAIResponseWithdrawalRequested() {

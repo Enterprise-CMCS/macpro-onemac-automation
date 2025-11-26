@@ -1,6 +1,8 @@
 package gov.cms.onemac.pages;
 
 import gov.cms.onemac.utils.ConfigReader;
+import gov.cms.onemac.utils.ExcelPackageSelector;
+import gov.cms.onemac.utils.ExcelPackageTracker;
 import gov.cms.onemac.utils.UIElementUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,6 +12,7 @@ import org.openqa.selenium.WebDriver;
 
 
 public class StateEarlyAlert {
+
     private static final Logger logger = LogManager.getLogger();
     private WebDriver driver;
     private UIElementUtils utils;
@@ -19,7 +22,8 @@ public class StateEarlyAlert {
     private By seaUsername = By.cssSelector("input[id=\"UserName\"]");
     private By seaPassword = By.id("Password");
     private By logOn = By.cssSelector("input[value=\"Log On\"]");
-
+//Waivers
+    private By actionType = By.id("Action_Type");
     //create package
     private By stateDropdown = By.id("State_Code");
     private By idNumber = By.id("ID_Number");
@@ -40,7 +44,7 @@ public class StateEarlyAlert {
     private By summaryMemo = By.id("Summary_Memo");
     //Approval/Effective/Expiration Dates
     private By proposedDate = By.id("Proposed_Date");
-
+    private  By approvedEffecDate = By.id("Approved_Effective_Date");
     //Request for Additional Information locators
 
     private By addRAI = By.id("addRAI");
@@ -71,6 +75,9 @@ public class StateEarlyAlert {
 
     private By completionStatus = By.id("SPW_Status_ID");
 
+    //OCD/Group Director/ARA Review
+    private By ocdGroupDirector = By.id("OCD_Review_ID");
+
 
     public StateEarlyAlert(WebDriver driver, UIElementUtils utils) {
         this.driver = driver;
@@ -87,6 +94,11 @@ public class StateEarlyAlert {
         utils.sendKeysByActions(seaPassword, ConfigReader.getPassword("sea"));
         utils.clickElement(logOn);
         logger.info("Successfully logged in as: " + username);
+    }
+
+    public void navigateToSEATool() {
+        logger.info("Navigating to SEATool...");
+        driver.get(utils.getSeaToolEnv());
     }
 
     public void addRaiResponseReceivedDate(String spaId, String raiResponseDate) {
@@ -116,6 +128,7 @@ public class StateEarlyAlert {
     }
 
     public void createPackage(String packageID, String initialSubDate, String proposedEffectiveDate) {
+        logger.info("Creating package: {} in SEATool.", packageID);
         utils.clickElement(seaAddEdit);
         utils.clickElement(addNew);
         utils.selectFromDropdown(stateDropdown, "value", utils.getStateCode(packageID));
@@ -136,8 +149,34 @@ public class StateEarlyAlert {
         utils.clickElement(save);
         utils.isVisible(successMessage);
         utils.safelyAcceptAlert();
+        logger.info("Successfully created package: {} in SEATool.", packageID);
+        ExcelPackageTracker.updateStatus(packageID,"Under Review");
     }
-
+    public void createWaiver(String packageID, String initialSubDate, String proposedEffectiveDate) {
+        logger.info("Creating package: {} in SEATool.", packageID);
+        utils.clickElement(seaAddEdit);
+        utils.clickElement(addNew);
+        utils.selectFromDropdown(stateDropdown, "value", utils.getStateCode(packageID));
+        utils.sendKeys(idNumber, utils.removeStateCode(packageID));
+        utils.selectFromDropdown(authority, "text", "1915(b)");
+        utils.sendKeys(initSubDate, initialSubDate);
+        utils.sendKeys(initSubDate, Keys.TAB);
+        utils.clickElement(confirmSave);
+        utils.clickElement(statePlanWaiverConfirm);
+        utils.selectFromDropdown(actionType,"text","New");
+        utils.selectFromDropdown(type, "text", "1915 (b) Waiver");
+        utils.clickElement(typeBtn);
+        utils.selectFromDropdown(serviceSubType, "text", "1915 (b) (1)");
+        utils.clickElement(addSubTypeBtn);
+        utils.selectFromDropdown(leadAnalystID, "text", "Test2, Test1");
+        utils.sendKeys(subject, "Subject Test");
+        utils.sendKeys(summaryMemo, "Description test");
+        utils.sendKeys(proposedDate, proposedEffectiveDate);
+        utils.clickElement(save);
+        utils.isVisible(successMessage);
+        utils.safelyAcceptAlert();
+        logger.info("Successfully created package: {} in SEATool.", packageID);
+    }
     public void requestRAI(String packageID, String initialSubDate, String proposedEffDate, String raiRequestDate) {
         logger.info("Creating SPA in SEATool and Requesting RAI...");
         utils.clickElement(seaAddEdit);
@@ -177,6 +216,39 @@ public class StateEarlyAlert {
         utils.isVisible(successMessage);
         utils.safelyAcceptAlert();
         logger.info("Successfully updated package status to: {}", status);
+        ExcelPackageTracker.updateStatus(packageID,status);
     }
+    public void updateStatus(String packageID, String status) {
+        logger.info("Updating package status in SEATool to {}", status);
+        utils.clickElement(seaAddEdit);
+        utils.sendKeys(searchId, packageID);
+        utils.clickElement(spaButton);
+        utils.waitForNumberOfElementsToBe(statePlanGrid, 1);
+        utils.clickElement(editStateAction);
+        utils.sendKeys(approvedEffecDate, utils.getInitialSubmissionDate());
+        utils.selectFromDropdown(completionStatus, "text", status);
+        utils.clickElement(save);
+        utils.isVisible(successMessage);
+        utils.safelyAcceptAlert();
+        logger.info("Successfully updated package status to: {}", status);
+        ExcelPackageTracker.updateStatus(packageID,status);
+    }
+
+    public void markPackageApproved(String packageID) {
+        logger.info("Marking package {} as Approved in SEATool.", packageID);
+        utils.clickElement(seaAddEdit);
+        utils.sendKeys(searchId, packageID);
+        utils.clickElement(spaButton);
+        utils.waitForNumberOfElementsToBe(statePlanGrid, 1);
+        utils.clickElement(editStateAction);
+        utils.selectFromDropdown(ocdGroupDirector,"text","Yes");
+        utils.clickElement(save);
+        utils.isVisible(successMessage);
+        utils.safelyAcceptAlert();
+        logger.info("Successfully marked package {} as Approved in SEATool.", packageID);
+        ExcelPackageTracker.updateStatus(packageID,"Approved");
+    }
+
+
 }
 

@@ -24,6 +24,10 @@ public class StateUser {
     private By uploadSubsequentDocuments = By.linkText("Upload Subsequent Documents");
     private By withdrawPackage = By.linkText("Withdraw Package");
     private By withdrawalRequest = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Withdrawal Requested']");
+    private By coverLetter = By.xpath("//tbody/tr/td[text()=\"Cover Letter\"]/parent::tr/td[2]/button[text()=\"testDocument.docx\"]");
+    private By statusApproved = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Approved']");
+    private By statusDisapproved = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Disapproved']");
+    private By statusTerminated = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Terminated']");
     private final int TIME_OUT = 5;
 
     private static final Logger logger = LogManager.getLogger(StateUser.class);
@@ -45,7 +49,9 @@ public class StateUser {
     public void submitPackage(SpaPackage spa, String effDate) {
         PageFactory.getDashboardPage(driver, utils).submitPackage(spa, effDate);
     }
-
+    public void submitWaiver(String waiverID) {
+        PageFactory.getDashboardPage(driver, utils).submitWaiver(waiverID, utils.getInitialSubmissionDate());
+    }
     public SubmitMedicaidSpaPage verifySpaSubmitted(SpaPackage spaPackage) {
         return PageFactory.getSubmitMedicaidSpaPage(driver, utils).isSpaSubmitted(spaPackage);
     }
@@ -61,9 +67,32 @@ public class StateUser {
         PageFactory.getDashboardPage(driver, utils)
                 .openPackage(spaPackage);
     }
+    public void openWaiverPackage(String waiver) {
+        PageFactory.getDashboardPage(driver, utils)
+                .openWaiver(waiver);
+    }
+    public void uploadSubsequentDocuments(String text) {
+        PageFactory.getDashboardPage(driver, utils).uploadSubsequentDocuments(text);
+    }
+
+    public boolean isUploadSubsequentDocumentsLinkNotVisible(){
+      return utils.refreshUntilInvisible(uploadSubsequentDocuments,TIME_OUT);
+    }
 
     public boolean isPackageStatusUnderReview() {
         return utils.refreshUntilVisible(underReview, TIME_OUT);
+    }
+
+    public boolean isPackageStatusApproved() {
+        return utils.refreshUntilVisible(statusApproved, TIME_OUT);
+    }
+
+    public boolean isPackageStatusDisapproved() {
+        return utils.refreshUntilVisible(statusDisapproved, TIME_OUT);
+    }
+
+    public boolean isPackageStatusTerminated() {
+        return utils.refreshUntilVisible(statusTerminated, TIME_OUT);
     }
 
     public boolean isUploadSubsequentDocumentsLinkPresent() {
@@ -111,5 +140,9 @@ public class StateUser {
         boolean status = utils.refreshUntilVisible(raiWithdrawalRequested, TIME_OUT);
         logger.info("RAI Response - Withdrawal Requested Status Check Completed for State User.");
         return status;
+    }
+
+    public boolean isCoverLetterPresent() {
+        return utils.isVisible(coverLetter);
     }
 }

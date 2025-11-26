@@ -9,10 +9,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class SubmitMedicaidSpaPage {
+
     private static final Logger logger = LogManager.getLogger();
     final String filePath = "src/test/resources/testDocument.docx";
 
     private WebDriver driver;
+
     private UIElementUtils uiElementUtils;
 
     private By spaIDField = By.id("spa-id");

@@ -210,6 +210,44 @@ public class UIElementUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         return LocalDate.now().format(formatter);
     }
+    public boolean refreshUntilInvisible(By locator, int timeoutSeconds) {
+        // Store original implicit wait
+        Duration originalImplicitWait = driver.manage().timeouts().getImplicitWaitTimeout();
+
+        try {
+            // Temporarily reduce implicit wait for faster polling
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+
+            long endTime = System.currentTimeMillis() + (timeoutSeconds * 1000);
+
+            while (System.currentTimeMillis() < endTime) {
+                try {
+                    WebElement element = driver.findElement(locator);
+
+                    // If found AND visible keep waiting
+                    if (!element.isDisplayed()) {
+                        return true; // element became invisible
+                    }
+                } catch (NoSuchElementException | StaleElementReferenceException e) {
+                    // If the element is NOT found or stale, it's effectively invisible
+                    return true;
+                }
+
+                // Try again after refreshing the page
+                driver.navigate().refresh();
+                Thread.sleep(500);
+            }
+
+            return false; // timeout reached
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } finally {
+            // Restore original implicit wait
+            driver.manage().timeouts().implicitlyWait(originalImplicitWait);
+        }
+    }
+
 
     public boolean refreshUntilVisible(By locator, int timeoutSeconds) {
         // store original implicit wait
