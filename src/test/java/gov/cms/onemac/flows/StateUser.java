@@ -21,6 +21,7 @@ public class StateUser {
     private By raiIssued = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='RAI Issued']");
     private By packageWithdrawn = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Package Withdrawn']");
     private By underReview = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Under Review']");
+    private By unsubmitted = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Unsubmitted']");
     private By uploadSubsequentDocuments = By.linkText("Upload Subsequent Documents");
     private By withdrawPackage = By.linkText("Withdraw Package");
     private By withdrawalRequest = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Withdrawal Requested']");
@@ -41,6 +42,10 @@ public class StateUser {
         return PageFactory.getLoginPage(driver, utils).loginAsStateUser();
     }
 
+    public void submitWaiver1915c(String waiverAmendment, String amendmentTitle, String proposedEffectiveDate) {
+        PageFactory.getDashboardPage(driver, utils).submitWaiver1915c(waiverAmendment, amendmentTitle, proposedEffectiveDate);
+    }
+
     public void navigateToOneMac() {
         logger.info("Navigating To OneMAC...");
         driver.get(utils.getOneMACEnv());
@@ -49,9 +54,13 @@ public class StateUser {
     public void submitPackage(SpaPackage spa, String effDate) {
         PageFactory.getDashboardPage(driver, utils).submitPackage(spa, effDate);
     }
+    public void submitMedicaidSPA(String state, String authority) {
+        PageFactory.getDashboardPage(driver, utils).submitMedicaidSpa(state, authority);
+    }
     public void submitWaiver(String waiverID) {
         PageFactory.getDashboardPage(driver, utils).submitWaiver(waiverID, utils.getInitialSubmissionDate());
     }
+
     public SubmitMedicaidSpaPage verifySpaSubmitted(SpaPackage spaPackage) {
         return PageFactory.getSubmitMedicaidSpaPage(driver, utils).isSpaSubmitted(spaPackage);
     }
@@ -67,20 +76,25 @@ public class StateUser {
         PageFactory.getDashboardPage(driver, utils)
                 .openPackage(spaPackage);
     }
+
     public void openWaiverPackage(String waiver) {
         PageFactory.getDashboardPage(driver, utils)
                 .openWaiver(waiver);
     }
+
     public void uploadSubsequentDocuments(String text) {
         PageFactory.getDashboardPage(driver, utils).uploadSubsequentDocuments(text);
     }
 
-    public boolean isUploadSubsequentDocumentsLinkNotVisible(){
-      return utils.refreshUntilInvisible(uploadSubsequentDocuments,TIME_OUT);
+    public boolean isUploadSubsequentDocumentsLinkNotVisible() {
+        return utils.refreshUntilInvisible(uploadSubsequentDocuments, TIME_OUT);
     }
 
     public boolean isPackageStatusUnderReview() {
         return utils.refreshUntilVisible(underReview, TIME_OUT);
+    }
+    public boolean isPackageStatusUnsubmitted() {
+        return utils.refreshUntilVisible(unsubmitted, TIME_OUT);
     }
 
     public boolean isPackageStatusApproved() {
@@ -136,7 +150,7 @@ public class StateUser {
     }
 
     public boolean isStatusUpdatedToFormalRAIResponseWithdrawalRequested() {
-        logger.info("RAI Response - Withdrawal Requested Status Check Completed for State User.");
+        logger.info("RAI Response - Withdrawal Requested Status Check started for State User...");
         boolean status = utils.refreshUntilVisible(raiWithdrawalRequested, TIME_OUT);
         logger.info("RAI Response - Withdrawal Requested Status Check Completed for State User.");
         return status;

@@ -1,6 +1,7 @@
 package gov.cms.onemac.pages;
 
 import gov.cms.onemac.models.SpaPackage;
+import gov.cms.onemac.utils.PageFactory;
 import gov.cms.onemac.utils.UIElementUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,6 +54,7 @@ public class DashboardPage {
         return new SubmissionTypePage(driver, utils);
     }
 
+
     public HomePage goToHomePage() {
         utils.isVisible(dashboardTab);
         utils.clickElement(homePageLink);
@@ -90,9 +92,13 @@ public class DashboardPage {
         utils.clickElement(By.linkText(packageID));
     }
 
+    public void submitWaiver1915c(String waiverAmendment, String amendmentTitle,String date){
+        SubmissionTypePage typePage = selectNewSubmission();
+        typePage.openWaiverTypePage().submitWaiver1915cAppendixK(waiverAmendment,amendmentTitle,date);
+    }
     public void submitPackage(SpaPackage spaPackage, String effectiveDate) {
         SubmissionTypePage typePage = selectNewSubmission();
-        typePage.selectSpaType()
+        typePage.openSpaTypePage()
                 .selectMedicaidSpa()
                 .allOtherMedicaidSpa()
                 .enterSpaId(spaPackage.getPackageId())
@@ -101,10 +107,14 @@ public class DashboardPage {
         logger.info("Successfully Submitted Package: {} in OneMAC.", spaPackage.getPackageId());
     }
 
+    public void submitMedicaidSpa(String state, String authority) {
+      PageFactory.getSpaTypePage(driver,utils).submitNewStateAmendmentSPA(state,authority);
+    }
+
     public void submitWaiver(String waiverID, String date) {
         SubmissionTypePage typePage = selectNewSubmission();
-        typePage.selectWaiverAction().
-                selectWaiver1915bType().
+        typePage.openWaiverTypePage().
+                openWaiver1915bTypePage().
                 selectWaiver1915b4Authority().
                 selectInitialWaiver().
                 enterWaiverId(waiverID).
@@ -112,7 +122,6 @@ public class DashboardPage {
                 uploadAttachment().
                 submitPackage().
                 isSubmitted();
-
     }
 
 
@@ -137,6 +146,7 @@ public class DashboardPage {
                 clickPackage(waiver);
         return new DashboardPage(driver, utils);
     }
+
     public void uploadSubsequentDocuments(String text) {
         utils.clickElement(uploadSubsequentDocuments);
         utils.uploadFileAndCommit(coverLetter, filePath);

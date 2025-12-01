@@ -21,9 +21,9 @@ public class UIElementUtils {
 
     private String proposedEffectiveDate = getPastBusinessDate(7);
     private String initialSubmissionDate = getPastBusinessDate(7);
-    private String raiRequestDate = getPastBusinessDate(5);
-    private String raiResponseDate = getPastBusinessDate(5);
-    private String raiResponseWithdrawnDate = getPastBusinessDate(4);
+    private String raiRequestDate = getPastBusinessDate(7);
+    private String raiResponseDate = getPastBusinessDate(7);
+    private String raiResponseWithdrawnDate = getPastBusinessDate(3);
     private WebDriver driver;
 
     public String getProposedEffectiveDate() {

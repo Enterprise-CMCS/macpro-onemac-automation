@@ -19,6 +19,7 @@ public class CMSUser {
     private By pending = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Pending']");
     private By intakeNeeded = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Submitted - Intake Needed']");
     private By packageWithdrawn = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Package Withdrawn']");
+    private By statusUnsubmitted = By.xpath("//dl[@aria-labelledby='package-status-heading']/dt[text()='Unsubmitted']");
     private static final Logger logger = LogManager.getLogger();
     private WebDriver driver;
     private UIElementUtils utils;
@@ -58,6 +59,10 @@ public class CMSUser {
         return utils.refreshUntilVisible(statusPendingApproval, TIME_OUT);
     }
 
+    public boolean isUnsubmittedVisible() {
+        return utils.refreshUntilVisible(statusUnsubmitted, TIME_OUT);
+    }
+
     public boolean isPackageStatusPending() {
         return utils.refreshUntilVisible(pending, TIME_OUT);
     }
@@ -70,9 +75,7 @@ public class CMSUser {
         return utils.refreshUntilVisible(packageWithdrawn, TIME_OUT);
     }
 
-    public boolean isStatusPendingRAI() {
-        return utils.refreshUntilVisible(pendingRAI, TIME_OUT);
-    }
+
 
     public boolean isStatusSubmittedIntakeNeeded() {
         return utils.refreshUntilVisible(intakeNeeded, TIME_OUT);
@@ -90,6 +93,13 @@ public class CMSUser {
         logger.info("Checking that package status displays RAI Response - Withdrawal Requested for CMS User...");
         boolean status = utils.refreshUntilVisible(raiWithdrawalRequested, TIME_OUT);
         logger.info("Checking that package status displays RAI Response - Withdrawal Requested for CMS User is Complete.");
+        return status;
+    }
+
+    public boolean isStatusPendingRAI() {
+        logger.info("Checking that package status displays Pending - RAI for CMS User...");
+        boolean status = utils.refreshUntilVisible(pendingRAI, TIME_OUT);
+        logger.info("Checking that package status displays Pending - RAI for CMS User is Complete.");
         return status;
     }
 

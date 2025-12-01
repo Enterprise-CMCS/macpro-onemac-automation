@@ -5,26 +5,28 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class SubmissionTypePage {
-    private UIElementUtils utils;
-    private WebDriver driver;
 
-    private By statePlanAmendment = By.xpath("//h2[text()=\"State Plan Amendment (SPA)\"]/ancestor::a");
-    private By waiverAction  = By.xpath("//h2[text()=\"Waiver Action\"]/ancestor::a");
+    private final WebDriver driver;
+    private final UIElementUtils ui;
 
+    private static final By SPA_TITLE =
+            By.xpath("//h2[text()='State Plan Amendment (SPA)']/ancestor::a");
 
+    private static final By WAIVER_ACTION_TILE =
+            By.xpath("//h2[text()='Waiver Action']/ancestor::a");
 
-    public SubmissionTypePage(WebDriver driver, UIElementUtils utils) {
+    public SubmissionTypePage(WebDriver driver, UIElementUtils ui) {
         this.driver = driver;
-        this.utils = utils;
+        this.ui = ui;
     }
 
-    public SpaTypePage selectSpaType() {
-        utils.clickElement(statePlanAmendment);
-        return new SpaTypePage(driver, utils);
+    public SpaPage openSpaTypePage() {
+        ui.clickElement(SPA_TITLE);
+        return new SpaPage(driver, ui);
     }
 
-    public WaiverType selectWaiverAction() {
-        utils.clickElement(waiverAction);
-        return new WaiverType(driver, utils);
+    public WaiverTypePage openWaiverTypePage() {
+        ui.clickElement(WAIVER_ACTION_TILE);
+        return new WaiverTypePage(driver, ui);
     }
 }

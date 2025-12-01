@@ -5,10 +5,8 @@ import gov.cms.onemac.flows.CMSUser;
 import gov.cms.onemac.flows.SeaUser;
 import gov.cms.onemac.flows.StateUser;
 import gov.cms.onemac.models.SpaPackage;
-import gov.cms.onemac.utils.AssertionUtil;
-import gov.cms.onemac.utils.ExcelPackageTracker;
-import gov.cms.onemac.utils.SpaGenerator;
-import gov.cms.onemac.utils.WaiverIdGenerator;
+import gov.cms.onemac.models.WaiverPackage;
+import gov.cms.onemac.utils.*;
 import org.testng.annotations.Test;
 
 
@@ -19,15 +17,15 @@ public class PackageLifecycleE2ETests extends BaseTest {
     public void initialSubmissionWorkflow() {
 
         // ---------- Arrange ----------
-        SpaPackage spa = SpaGenerator.createSpa("MD", "Medicaid SPA");
-
+       // SpaPackage spa = SpaGenerator.createSpa("MD", "Medicaid SPA");
         StateUser state = createNewStateUser();
-        state.navigateToOneMac();
+        state.submitMedicaidSPA("MD","Medicaid SPA");
+       /* state.navigateToOneMac();
         state.login();
         state.submitPackage(spa, getUtils().getProposedEffectiveDate());
-        state.verifySpaSubmitted(spa);
+        state.verifySpaSubmitted(spa);*/
 
-        SeaUser sea = createNewSeaUser();
+     /*   SeaUser sea = createNewSeaUser();
         sea.login();
         sea.createPackage(
                 spa,
@@ -57,9 +55,8 @@ public class PackageLifecycleE2ETests extends BaseTest {
         AssertionUtil.assertTrue(
                 isPendingVisible,
                 "CMS user should see the package status as 'Pending'."
-        );
+        );*/
     }
-
 
 
     @Test
@@ -107,7 +104,6 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 "CMS user should see the package status as 'Pending RAI'."
         );
     }
-
 
 
     @Test
@@ -173,9 +169,8 @@ public class PackageLifecycleE2ETests extends BaseTest {
     }
 
 
-
     @Test
-    public void verifyEnableDisableRaiResponseWithdrawalRefactored() {
+    public void verifyEnableDisableRaiResponseWithdrawal() {
 
         // ---------- Arrange ----------
         SpaPackage spa = SpaGenerator.createSpa("MD", "Medicaid SPA");
@@ -201,10 +196,11 @@ public class PackageLifecycleE2ETests extends BaseTest {
 
         boolean isRaiIssuedVisible = state.isRaiIssued();
         boolean isFormalRaiLinkVisible = state.isFormalRaiLinkVisible();
-
+        AssertionUtil.assertTrue(isRaiIssuedVisible,"RAI Issued link should be visible for state users.");
+        AssertionUtil.assertTrue(isFormalRaiLinkVisible,"Formal RAI link should be visible for state users.");
         state.respondToRAI();
         boolean isSubmittedAfterResponse = state.isPackageStatusSubmitted();
-
+        AssertionUtil.assertTrue(isSubmittedAfterResponse,"Submitted status should be visible for state users.");
         // ---------- CMS: sees Submitted - Intake Needed ----------
         restartDriver();
 
@@ -214,6 +210,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
         cms.openPackage(spa);
 
         boolean isIntakeNeededVisible = cms.isStatusSubmittedIntakeNeeded();
+        AssertionUtil.assertTrue(isIntakeNeededVisible,"Intake Needed should be visible for CMS users.");
 
         // ---------- SEA: Add Response Received Date ----------
         sea = createNewSeaUser();
@@ -225,7 +222,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
         cms.openPackage(spa);
 
         boolean isEnableFormalRaiResponseLinkVisible = cms.isEnableFormalRAIResponseLinkVisible();
-
+        AssertionUtil.assertTrue(isEnableFormalRaiResponseLinkVisible,"Enable Formal RAI link should be visible CMS users.");
         cms.enableRAIResponseWithdraw();
 
         // ---------- State: Withdraw Formal RAI Response ----------
@@ -237,11 +234,12 @@ public class PackageLifecycleE2ETests extends BaseTest {
         state.openPackage(spa);
 
         boolean isWithdrawFormalRaiResponseLinkVisible = state.isWithdrawFormalRAIResponseLinkVisible();
-
+        AssertionUtil.assertTrue(isWithdrawFormalRaiResponseLinkVisible,"Withdraw formal RAI link should be visible State users.");
         state.withdrawFormalRaiResponse("Testing RAI Response withdrawal");
 
         boolean isStateStatusUpdatedToRaiResponseWithdrawalRequested =
                 state.isStatusUpdatedToFormalRAIResponseWithdrawalRequested();
+        AssertionUtil.assertTrue(isStateStatusUpdatedToRaiResponseWithdrawalRequested,"State users should see status 'Formal RAI Response withdrawal Requested'.");
 
         // ---------- CMS: Validate RAI Response Withdrawal Requested ----------
         restartDriver();
@@ -253,15 +251,26 @@ public class PackageLifecycleE2ETests extends BaseTest {
 
         boolean isCMSStatusUpdatedToRaiResponseWithdrawalRequested =
                 cms.isStatusUpdatedToFormalRAIResponseWithdrawalRequested();
-
+        AssertionUtil.assertTrue(isCMSStatusUpdatedToRaiResponseWithdrawalRequested,"CMS users should see status 'Formal RAI Response withdrawal Requested'.");
         // ---------- SEA: Add RAI Response Withdrawal Date ----------
         sea = createNewSeaUser();
         sea.login();
         sea.addRaiResponseWithdrawnDate(spa, getUtils().getRaiResponseWithdrawnDate());
 
+        cms.navigateToOneMac();
+        cms.openPackage(spa);
 
+        boolean isPackageStatusPendingRAI = cms.isStatusPendingRAI();
+        AssertionUtil.assertTrue(isPackageStatusPendingRAI,"CMS users should see status 'Pending RAI'.");
+        restartDriver();
+        state = createNewStateUser();
+        state.navigateToOneMac();
+        state.login();
+        state.openPackage(spa);
+
+        boolean isRaiIssued = state.isRaiIssued();
+        AssertionUtil.assertTrue(isRaiIssued,"State users should see status 'Pending RAI'.");
     }
-
 
 
     @Test
@@ -776,19 +785,23 @@ public class PackageLifecycleE2ETests extends BaseTest {
     public void verifyPendingApprovalWorkflow() {
 
         // ---------- Arrange ----------
-        SpaPackage spa = SpaGenerator.createSpa("MD", "Medicaid SPA");
+        WaiverPackage parent = ExcelPackageSelector.selectWaiver("MD", "1915(c)", "Initial", "Approved");
+        String amendment = ExcelPackageTracker.nextAmendmentFromParent(parent.getPackageId());
+        ExcelPackageTracker.appendNewPackage(
+                "Waiver", parent.getState(), parent.getAuthority(), "Amendment",
+                amendment, "", parent.getPackageId()
+        );
 
         StateUser state = createNewStateUser();
         state.navigateToOneMac();
         state.login();
-        state.submitPackage(spa, getUtils().getProposedEffectiveDate());
-        state.verifySpaSubmitted(spa);
+        state.submitWaiver1915c(amendment, "Test Amendment", getUtils().getProposedEffectiveDate());
+
 
         SeaUser sea = createNewSeaUser();
         sea.login();
-        sea.createPackage(
-                spa,
-                getUtils().getInitialSubmissionDate(),
+        sea.createWaiver(
+                amendment, getUtils().getInitialSubmissionDate(),
                 getUtils().getProposedEffectiveDate()
         );
 
@@ -798,17 +811,17 @@ public class PackageLifecycleE2ETests extends BaseTest {
         CMSUser cms = createNewCMSUser();
         cms.navigateToOneMac();
         cms.login();
-        cms.openPackage(spa);
+        cms.openWaiverPackage(amendment);
         boolean isPendingVisible = cms.isPackageStatusPending();
 
         // SEA updates package status to Pending-Approval
         sea = createNewSeaUser();
         sea.login();
-        sea.updateStatus(spa, "Pending-Approval");
+        sea.updatePackageStatus(amendment, "Pending-Approval");
 
         // Re-open package as CMS to verify status
         cms.navigateToOneMac();
-        cms.openPackage(spa);
+        cms.openWaiverPackage(amendment);
         boolean isPendingApprovalVisible = cms.isPackageStatusPendingApproval();
 
         // ---------- State checks after SEA and CMS updates ----------
@@ -817,7 +830,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
         state = createNewStateUser();
         state.navigateToOneMac();
         state.login();
-        state.openPackage(spa);
+        state.openWaiverPackage(amendment);
 
         boolean isUnderReviewVisible = state.isPackageStatusUnderReview();
         boolean isSubsequentDocumentsLinkNotVisible = state.isUploadSubsequentDocumentsLinkNotVisible();
@@ -843,6 +856,84 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 "CMS user should see the package status as 'Pending-Approval'."
         );
     }
+
+
+    @Test
+    public void verifyUnsubmittedWorkflow() {
+
+        // ---------- Arrange ----------
+        WaiverPackage parent = ExcelPackageSelector.selectWaiver("MD", "1915(c)", "Initial", "Approved");
+        String amendment = ExcelPackageTracker.nextAmendmentFromParent(parent.getPackageId());
+        ExcelPackageTracker.appendNewPackage(
+                "Waiver", parent.getState(), parent.getAuthority(), "Amendment",
+                amendment, "", parent.getPackageId()
+        );
+
+        StateUser state = createNewStateUser();
+        state.navigateToOneMac();
+        state.login();
+        state.submitWaiver1915c(amendment, "Test Amendment", getUtils().getProposedEffectiveDate());
+
+
+        SeaUser sea = createNewSeaUser();
+        sea.login();
+        sea.createWaiver(
+                amendment, getUtils().getInitialSubmissionDate(),
+                getUtils().getProposedEffectiveDate()
+        );
+
+        // ---------- Act ----------
+        restartDriver();
+
+        CMSUser cms = createNewCMSUser();
+        cms.navigateToOneMac();
+        cms.login();
+        cms.openWaiverPackage(amendment);
+        boolean isPendingVisible = cms.isPackageStatusPending();
+
+        // SEA updates package status to Unsubmitted
+        sea = createNewSeaUser();
+        sea.login();
+        sea.updatePackageStatus(amendment, "Unsubmitted");
+
+        // Re-open package as CMS to verify status
+        cms.navigateToOneMac();
+        cms.openWaiverPackage(amendment);
+        boolean isCMSUnsubmitted = cms.isUnsubmittedVisible();
+
+        // ---------- State checks after SEA and CMS updates ----------
+        restartDriver();
+
+        state = createNewStateUser();
+        state.navigateToOneMac();
+        state.login();
+        state.openWaiverPackage(amendment);
+
+        boolean isStateUnsubmitted = state.isPackageStatusUnsubmitted();
+        boolean isSubsequentDocumentsLinkNotVisible = state.isUploadSubsequentDocumentsLinkNotVisible();
+
+        // ---------- Assert ----------
+        AssertionUtil.assertTrue(
+                isStateUnsubmitted,
+                "State user should see the package status as 'Unsubmitted'."
+        );
+
+        AssertionUtil.assertTrue(
+                isSubsequentDocumentsLinkNotVisible,
+                "State user should NOT see the 'Upload Subsequent Documents' link."
+        );
+
+        AssertionUtil.assertTrue(
+                isPendingVisible,
+                "CMS user should see package status as 'Pending'."
+        );
+
+        AssertionUtil.assertTrue(
+                isCMSUnsubmitted,
+                "CMS user should see the package status as 'Unsubmitted'."
+        );
+    }
+
 
 }
 

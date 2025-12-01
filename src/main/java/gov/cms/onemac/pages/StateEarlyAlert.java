@@ -158,15 +158,15 @@ public class StateEarlyAlert {
         utils.clickElement(addNew);
         utils.selectFromDropdown(stateDropdown, "value", utils.getStateCode(packageID));
         utils.sendKeys(idNumber, utils.removeStateCode(packageID));
-        utils.selectFromDropdown(authority, "text", "1915(b)");
+        utils.selectFromDropdown(authority, "text", "1915(c)");
         utils.sendKeys(initSubDate, initialSubDate);
         utils.sendKeys(initSubDate, Keys.TAB);
         utils.clickElement(confirmSave);
         utils.clickElement(statePlanWaiverConfirm);
-        utils.selectFromDropdown(actionType,"text","New");
-        utils.selectFromDropdown(type, "text", "1915 (b) Waiver");
+        utils.selectFromDropdown(actionType,"text","Amend");
+        utils.selectFromDropdown(type, "text", "1915(c) Waivers Do Not Use");
         utils.clickElement(typeBtn);
-        utils.selectFromDropdown(serviceSubType, "text", "1915 (b) (1)");
+        utils.selectFromDropdown(serviceSubType, "text", "Other Do Not Use");
         utils.clickElement(addSubTypeBtn);
         utils.selectFromDropdown(leadAnalystID, "text", "Test2, Test1");
         utils.sendKeys(subject, "Subject Test");
@@ -211,6 +211,7 @@ public class StateEarlyAlert {
         utils.clickElement(spaButton);
         utils.waitForNumberOfElementsToBe(statePlanGrid, 1);
         utils.clickElement(editStateAction);
+        utils.sendKeys(approvedEffecDate, utils.getInitialSubmissionDate());
         utils.selectFromDropdown(completionStatus, "text", status);
         utils.clickElement(save);
         utils.isVisible(successMessage);
