@@ -3,7 +3,7 @@
 
     <test name="E2E OneMAC SEATool">
         <classes>
-           <!-- <class name="gov.cms.onemac.tests.PackageLifecycleE2ETests"/>-->
+            <class name="gov.cms.onemac.tests.PackageLifecycleE2ETests"/>
         </classes>
     </test>
     <listeners>
