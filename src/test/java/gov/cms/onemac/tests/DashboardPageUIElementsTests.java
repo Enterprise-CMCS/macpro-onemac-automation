@@ -107,7 +107,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
        CMSUser cmsUser = createNewCMSUser();
        cmsUser.navigateToOneMac();
        cmsUser.login();
-        AssertionUtil.assertTrue(cmsUser.isHomeTabVisible(),"Home tab should be visible for cms users.");
+       AssertionUtil.assertTrue(cmsUser.isHomeTabVisible(),"Home tab should be visible for cms users.");
     }
 
     @Test
