@@ -1,13 +1,14 @@
 package gov.cms.onemac.tests;
 
 import gov.cms.onemac.base.BaseTest;
+import gov.cms.onemac.flows.CMSUser;
 import gov.cms.onemac.flows.StateUser;
 import gov.cms.onemac.utils.AssertionUtil;
 import org.testng.annotations.Test;
 
 public class DashboardPageUIElementsTests extends BaseTest {
 
-    /*@Test
+    @Test
     public void verifySPAsTabVisibleForCMSUser() {
         CMSUser cmsUser = createNewCMSUser();
         cmsUser.navigateToOneMac();
@@ -162,7 +163,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
             cmsUser.navigateToOneMac();
             cmsUser.login();
         AssertionUtil.assertTrue(cmsUser.isDashboardClickable(),"Dashboard should be clickable for cms users.");
-    }*/
+    }
 
     @Test
     public void verifyDashboardClickableForStateUser() {
