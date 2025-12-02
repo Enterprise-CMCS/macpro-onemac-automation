@@ -1,272 +1,187 @@
 package gov.cms.onemac.tests;
 
 import gov.cms.onemac.base.BaseTest;
+import gov.cms.onemac.flows.CMSUser;
+import gov.cms.onemac.flows.StateUser;
 import gov.cms.onemac.pages.DashboardPage;
 import gov.cms.onemac.pages.LoginPage;
+import gov.cms.onemac.utils.AssertionUtil;
 import gov.cms.onemac.utils.ConfigReader;
 import gov.cms.onemac.utils.PageFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class DashboardPageUIElementsTests extends BaseTest {
     private static final Logger logger = LogManager.getLogger();
 
-    @BeforeMethod
-    public void navigateToOneMAC(){
-        getDriver().get(ConfigReader.get("oneMACDev"));
-    }
+
 
     @Test
     public void verifySPAsTabVisibleForCMSUser() {
-        logger.info("Starting login test for CMS user");
-        LoginPage loginPage = PageFactory.getLoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        logger.info("Login test completed successfully");
-        DashboardPage dashboardPage = PageFactory.getDashboardPage(getDriver(), getUtils());
-       // Assert.assertTrue(dashboardPage.isSPAsTabVisible(), "SPAs tab not visible on dashboard.");
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isSPATabVisible(), "SPAs tab should be visible on dashboard.");
     }
 
-/*    @Test
+  @Test
     public void verifySPAsTabVisibleForStateUser() {
-
-        LoginPage loginPage = PageFactory.getLoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isSPAsTabVisible(), "SPAs tab not visible on dashboard.");
+      StateUser stateUser = createNewStateUser();
+      stateUser.navigateToOneMac();
+      stateUser.login();
+        AssertionUtil.assertTrue(stateUser.isSPATabVisible(), "SPAs tab should be visible on dashboard.");
     }
 
     @Test
     public void verifySPAsTabClickableForStateUser() {
-
-        LoginPage loginPage = PageFactory.getLoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboardPage = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboardPage.isSPAsClickable(), "SPAs tab not clickable.");
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        AssertionUtil.assertTrue(stateUser.isSPATabClickable(), "SPAs tab should be clickable.");
     }
 
     @Test
     public void verifySPAsTabClickableForCMSUser() {
-
-        LoginPage loginPage = PageFactory.getLoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        DashboardPage dashboardPage = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboardPage.isSPAsClickable(), "SPAs tab not clickable.");
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isSPATabClickable(), "SPAs tab should be visible on dashboard.");
     }
 
     @Test
     public void verifyNewSubmissionIsAvailableForStateUser() {
-
-        LoginPage loginPage = PageFactory.getLoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isNewSubmissionAvailable(), "New Submission isn't available.");
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        AssertionUtil.assertTrue(stateUser.isNewSubmissionAvailable(), "New Submission should be visible for state users.");
     }
 
     @Test
     public void verifyNewSubmissionIsNotAvailableForCMSUser() {
-
-        LoginPage loginPage = PageFactory.getLoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isNewSubmissionNotAvailable(), "New Submission is available.");
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isNewSubmissionNotAvailable(), "New Submission shouldn't be visible for cms users.");
     }
 
     @Test
     public void verifyWaiverTabIsVisibleForStateUser() {
-
-        LoginPage loginPage = PageFactory.getLoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isWaiverTabVisible(), "Waiver tab not visible on dashboard.");
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        AssertionUtil.assertTrue(stateUser.isWaiverTabVisible(), "Waiver tab should be visible on dashboard for state users.");
     }
 
     @Test
     public void verifyWaiverTabIsVisibleForCMS() {
-
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isWaiverTabVisible(), "Waiver tab not visible on dashboard.");
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isWaiverTabVisible(), "Waiver tab should be visible on dashboard for cms users.");
     }
 
-    @Test
+   @Test
     public void verifyPageTitleIsCorrectForStateUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        // Assert.assertEquals(dashboard.getPageTitle(), "OneMAC");
+       StateUser stateUser = createNewStateUser();
+       stateUser.navigateToOneMac();
+       stateUser.login();
+       AssertionUtil.assertEquals(stateUser.getPageTitle(), "OneMAC","Page title should be 'OneMAC'.");
 
     }
 
     @Test
     public void verifyPageTitleIsCorrectForCMSUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertEquals(cmsUser.getPageTitle(), "OneMAC","Page title should be 'OneMAC'.");
 
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        //  Assert.assertEquals(dashboard.getPageTitle(), "OneMAC");
 
     }
 
-    @Test
+   @Test
     public void verifyHomeTabVisibleForCMSUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isHomeTabVisible());
+       CMSUser cmsUser = createNewCMSUser();
+       cmsUser.navigateToOneMac();
+       cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isHomeTabVisible(),"Home tab should be visible for cms users.");
     }
 
     @Test
     public void verifyHomeTabVisibleForStateUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isHomeTabVisible());
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        AssertionUtil.assertTrue(stateUser.isHomeTabVisible(),"Home tab should be visible for state users.");
     }
 
 
     @Test
     public void verifyDashboardVisibleForStateUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isDashboardVisible());
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        AssertionUtil.assertTrue(stateUser.isDashboardVisible(),"Dashboard should be visible for state users.");
     }
 
     @Test
     public void verifyDashboardVisibleForCMSUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isDashboardVisible());
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isDashboardVisible(),"Dashboard tab should be visible for cms users.");
     }
 
     @Test
-    public void verifyUserManagementTabIsVisibleForCMSUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isUserManagementVisible());
+    public void verifyViewFAQsPageVisibleForCMSUser() {
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+       AssertionUtil.assertTrue(cmsUser.isViewFAQsPageVisible(),"View FAQs tab should be visible for cms users.");
     }
 
     @Test
-    public void verifyUserManagementTabIsVisibleForStateUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isUserManagementVisible());
+    public void verifyViewFAQsPageVisibleForStateUser() {
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        AssertionUtil.assertTrue(stateUser.isViewFAQsPageVisible(),"View FAQs tab should be visible for state users.");
     }
+
 
     @Test
     public void verifyHomeLinkClickableForStateUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isHomeLinkClickable());
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        AssertionUtil.assertTrue(stateUser.isHomePageClickable(),"Home page should be clickable for state users.");
     }
 
     @Test
     public void verifyHomeLinkClickableForCmsUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isHomeLinkClickable());
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isHomePageClickable(),"Home Page should be clickable for cms users.");
     }
 
     @Test
     public void verifyDashboardClickableForCmsUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("cms"),
-                ConfigReader.getPassword("cms")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isDashboardClickable());
+            CMSUser cmsUser = createNewCMSUser();
+            cmsUser.navigateToOneMac();
+            cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isDashboardClickable(),"Dashboard should be clickable for cms users.");
     }
 
     @Test
     public void verifyDashboardClickableForStateUser() {
-        LoginPage loginPage = new LoginPage(getDriver(), getUtils());
-        loginPage.login(
-
-                ConfigReader.getUsername("state"),
-                ConfigReader.getPassword("state")
-        );
-        DashboardPage dashboard = PageFactory.getDashboardPage(getDriver(), getUtils());
-        Assert.assertTrue(dashboard.isDashboardClickable());
-    }*/
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        AssertionUtil.assertTrue(stateUser.isDashboardClickable(),"Dashboard page should be clickable for state users.");
+    }
 }
+

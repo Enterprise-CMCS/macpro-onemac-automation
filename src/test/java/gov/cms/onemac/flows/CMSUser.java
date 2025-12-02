@@ -24,7 +24,7 @@ public class CMSUser {
     private WebDriver driver;
     private UIElementUtils utils;
 
-    private final int TIME_OUT = 5;
+    private final int TIME_OUT = 10;
 
     public CMSUser(WebDriver driver, UIElementUtils utils) {
         this.driver = driver;
@@ -42,13 +42,13 @@ public class CMSUser {
 
     public void openPackage(SpaPackage spaPackage) {
         PageFactory.getDashboardPage(driver, utils).
-                openPackage(spaPackage);
+                openSpaPackage(spaPackage);
 
     }
 
     public void openWaiverPackage(String waiver) {
         PageFactory.getDashboardPage(driver, utils)
-                .openWaiver(waiver);
+                .openWaiverPackage(waiver);
     }
 
     public boolean isPackageStatusPendingConcurrence() {
@@ -103,4 +103,37 @@ public class CMSUser {
         return status;
     }
 
+    public boolean isSPATabVisible() {
+     return PageFactory.getDashboardPage(driver,utils).isSPATabVisible();
+    }
+    public boolean isSPATabClickable() {
+        return PageFactory.getDashboardPage(driver,utils).isSPATabClickable();
+    }
+    public boolean isNewSubmissionNotAvailable() {
+        return PageFactory.getDashboardPage(driver,utils).isNewSubmissionNotAvailable();
+    }
+    public boolean isWaiverTabVisible() {
+        return PageFactory.getDashboardPage(driver,utils).isWaiverTabVisible();
+    }
+
+    public String getPageTitle(){
+        return PageFactory.getDashboardPage(driver,utils).getPageTitle();
+    }
+    public boolean isHomeTabVisible(){
+        return PageFactory.getDashboardPage(driver,utils).isHomeTabVisible();
+    }
+
+    public boolean isDashboardVisible(){
+        return PageFactory.getDashboardPage(driver,utils).isDashboardVisible();
+    }
+    public boolean isHomePageClickable(){
+        return PageFactory.getDashboardPage(driver,utils).isHomePageClickable();
+    }
+    public boolean isDashboardClickable(){
+        return PageFactory.getDashboardPage(driver,utils).isDashboardClickable();
+    }
+
+    public boolean isViewFAQsPageVisible(){
+        return PageFactory.getviewFAQsPage(driver,utils).isViewFAQsTabVisible();
+    }
 }

@@ -16,8 +16,11 @@ public class DashboardPage {
     final String filePath = "src/test/resources/testDocument.docx";
 
     // Locators
-    private By waiversTab = By.xpath("//button[text()='Waivers']");
-    private By spasTab = By.xpath("//button[text()='SPAs']");
+    private static final By DASHBOARD_GRID =
+            By.xpath("//tbody/tr");
+    private static final By WAIVERS_TAB
+            = By.xpath("//button[text()='Waivers']");
+    private static final By SPA_TAB = By.xpath("//button[text()='SPAs']");
     private By homeTab = By.cssSelector("a[data-testid='Home-d']");
     private By dashboardTab = By.cssSelector("a[data-testid='Dashboard-d']");
     private By userManagementTab = By.cssSelector("a[data-testid='Dashboard-d']");
@@ -28,7 +31,8 @@ public class DashboardPage {
     private By withdrawFormalRaiResponse = By.linkText("Withdraw Formal RAI Response");
     private By raiResponseLetter = By.cssSelector("input[data-testid='raiResponseLetter-upload']");
     private By submit = By.xpath("//button[text()='Submit']");
-
+    private static final By ACTION_TYPE =
+            By.xpath("//div[text()=\"Action Type\"]");
     private By withdrawalConfirmation = By.xpath("//button[text()=\"Yes, withdraw package\"]");
     private By confirmSubmission = By.xpath("//button[text()='Yes, Submit']");
     private By raiResponseSuccess = By.xpath("//h3[text()='RAI response submitted']");
@@ -42,18 +46,23 @@ public class DashboardPage {
     private By coverLetter = By.xpath("//label[text()=\"Cover Letter\"]/following-sibling::div/input");
     private By reasonForSubsequentDocuments = By.tagName("textArea");
     private By documentsSubmitted = By.xpath("//h3[text()=\"Documents submitted\"]");
-
+    private final By SEARCH_FIELD =
+            By.id("search-input");
+    private static final By STATUS =
+            By.xpath("//h2[text()=\"Status\"]");
 
     public DashboardPage(WebDriver driver, UIElementUtils utils) {
         this.driver = driver;
         this.utils = utils;
     }
 
-    public SubmissionTypePage selectNewSubmission() {
+    public void selectNewSubmission() {
         utils.javaScriptClicker(newSubmission);
-        return new SubmissionTypePage(driver, utils);
     }
 
+    public String getPageTitle(){
+        return driver.getTitle();
+    }
 
     public HomePage goToHomePage() {
         utils.isVisible(dashboardTab);
@@ -92,36 +101,17 @@ public class DashboardPage {
         utils.clickElement(By.linkText(packageID));
     }
 
-    public void submitWaiver1915c(String waiverAmendment, String amendmentTitle,String date){
-        SubmissionTypePage typePage = selectNewSubmission();
-        typePage.openWaiverTypePage().submitWaiver1915cAppendixK(waiverAmendment,amendmentTitle,date);
-    }
-    public void submitPackage(SpaPackage spaPackage, String effectiveDate) {
-        SubmissionTypePage typePage = selectNewSubmission();
-        typePage.openSpaTypePage()
-                .selectMedicaidSpa()
-                .allOtherMedicaidSpa()
-                .enterSpaId(spaPackage.getPackageId())
-                .pickEffectiveDate(effectiveDate)
-                .uploadAttachments().submit();
-        logger.info("Successfully Submitted Package: {} in OneMAC.", spaPackage.getPackageId());
+    public String submitWaiver1915cAppendixK(String amendmentTitle, String date) {
+     return PageFactory.getWaiverPage(driver,utils).submitWaiver1915cAppendixK(amendmentTitle,date);
     }
 
-    public void submitMedicaidSpa(String state, String authority) {
-      PageFactory.getSpaTypePage(driver,utils).submitNewStateAmendmentSPA(state,authority);
+
+    public SpaPackage submitNewStateAmendmentSPA(String state, String authority) {
+        return PageFactory.getSpaPage(driver, utils).submitNewStateAmendmentSPA(state, authority);
     }
 
-    public void submitWaiver(String waiverID, String date) {
-        SubmissionTypePage typePage = selectNewSubmission();
-        typePage.openWaiverTypePage().
-                openWaiver1915bTypePage().
-                selectWaiver1915b4Authority().
-                selectInitialWaiver().
-                enterWaiverId(waiverID).
-                pickEffectiveDate(date).
-                uploadAttachment().
-                submitPackage().
-                isSubmitted();
+    public String createFFSSelectiveContractingInitialWaiver() {
+     return PageFactory.getWaiverPage(driver,utils).createFFSSelectiveContractingInitialWaiver();
     }
 
 
@@ -134,18 +124,26 @@ public class DashboardPage {
         return new DashboardPage(driver, utils);
     }
 
-    public DashboardPage openPackage(SpaPackage spaPackage) {
-        goToHomePage().
-                searchSpaPackage(spaPackage.getPackageId()).
-                clickPackage(spaPackage.getPackageId());
+    public DashboardPage openSpaPackage(SpaPackage spaPackage) {
+        utils.clickElement(dashboardTab);
+        utils.clearInput(SEARCH_FIELD);
+        utils.sendKeys(SEARCH_FIELD, spaPackage.getPackageId());
+        utils.waitForSingleRecordAndClick();
+        utils.isVisible(STATUS);
         return new DashboardPage(driver, utils);
     }
-    public DashboardPage openWaiver(String waiver) {
-        goToHomePage().
-                searchWaiver(waiver).
-                clickPackage(waiver);
+
+    public DashboardPage openWaiverPackage(String waiver) {
+        utils.clickElement(dashboardTab);
+        utils.clickElement(WAIVERS_TAB);
+        utils.isVisible(ACTION_TYPE);
+        utils.clearInput(SEARCH_FIELD);
+        utils.sendKeys(SEARCH_FIELD, waiver);
+        utils.waitForNumberOfElementsToBe(DASHBOARD_GRID, 1);
+        clickPackage(waiver);
         return new DashboardPage(driver, utils);
     }
+
 
     public void uploadSubsequentDocuments(String text) {
         utils.clickElement(uploadSubsequentDocuments);
@@ -159,7 +157,9 @@ public class DashboardPage {
     public boolean isDashboardVisible() {
         return utils.isVisible(dashboardTab);
     }
-
+    public boolean isWaiverTabVisible() {
+        return utils.isVisible(WAIVERS_TAB);
+    }
     public boolean isNewSubmissionAvailable() {
         return utils.isVisible(newSubmission);
     }
@@ -167,4 +167,25 @@ public class DashboardPage {
     public boolean isNewSubmissionNotAvailable() {
         return utils.isNotVisible(newSubmission);
     }
+
+    public boolean isSPATabVisible(){
+        return utils.isVisible(SPA_TAB);
+    }
+    public boolean isSPATabClickable(){
+        return utils.isClickable(SPA_TAB);
+    }
+
+    public boolean isHomeTabVisible(){
+        return utils.isVisible(homeTab);
+    }
+
+    public boolean isHomePageClickable(){
+        return utils.isClickable(homeTab);
+    }
+
+    public boolean isDashboardClickable(){
+        return utils.isClickable(dashboardTab);
+    }
+
+
 }

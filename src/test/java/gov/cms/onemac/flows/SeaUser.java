@@ -30,23 +30,19 @@ public class SeaUser {
                 .requestRAI(spa.getPackageId(), initialSubDate,proposedEffDate, raiRequestDate);
     }
 
-    public void createPackage(SpaPackage spa, String initialDate, String proposedEffectiveDate) {
+    public void createSPAPackage(SpaPackage spa, String initialDate, String proposedEffectiveDate) {
         PageFactory.getStateEarlyAlertPage(driver, utils)
-                .createPackage(spa.getPackageId(), initialDate, proposedEffectiveDate);
+                .createSPAPackage(spa.getPackageId(), initialDate, proposedEffectiveDate);
     }
-    public void createWaiver(String waiver, String initialDate, String proposedEffectiveDate) {
+    public void createWaiverPackage(String waiver, String initialDate, String proposedEffectiveDate) {
         PageFactory.getStateEarlyAlertPage(driver, utils)
-                .createWaiver(waiver, initialDate, proposedEffectiveDate);
+                .createWaiverPackage(waiver, initialDate, proposedEffectiveDate);
     }
     public void updatePackageStatus(SpaPackage spa, String status) {
         PageFactory.getStateEarlyAlertPage(driver, utils)
                 .updatePackageStatus(spa.getPackageId(), status);
     }
 
-    public void updateStatus(SpaPackage spa, String status) {
-        PageFactory.getStateEarlyAlertPage(driver, utils)
-                .updateStatus(spa.getPackageId(), status);
-    }
     public void updatePackageStatus(String waiver, String status) {
         PageFactory.getStateEarlyAlertPage(driver, utils)
                 .updatePackageStatus(waiver, status);

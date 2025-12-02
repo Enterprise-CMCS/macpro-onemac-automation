@@ -127,8 +127,9 @@ public class StateEarlyAlert {
         utils.safelyAcceptAlert();
     }
 
-    public void createPackage(String packageID, String initialSubDate, String proposedEffectiveDate) {
-        logger.info("Creating package: {} in SEATool.", packageID);
+    public void createSPAPackage(String packageID, String initialSubDate, String proposedEffectiveDate) {
+        login();
+        logger.info("Creating SPA package: {} in SEATool...", packageID);
         utils.clickElement(seaAddEdit);
         utils.clickElement(addNew);
         utils.selectFromDropdown(stateDropdown, "value", utils.getStateCode(packageID));
@@ -149,11 +150,12 @@ public class StateEarlyAlert {
         utils.clickElement(save);
         utils.isVisible(successMessage);
         utils.safelyAcceptAlert();
-        logger.info("Successfully created package: {} in SEATool.", packageID);
+        logger.info("Successfully created SPA Package: {} in SEATool.", packageID);
         ExcelPackageTracker.updateStatus(packageID,"Under Review");
     }
-    public void createWaiver(String packageID, String initialSubDate, String proposedEffectiveDate) {
-        logger.info("Creating package: {} in SEATool.", packageID);
+    public void createWaiverPackage(String packageID, String initialSubDate, String proposedEffectiveDate) {
+        login();
+        logger.info("Creating waiver package: {} in SEATool...", packageID);
         utils.clickElement(seaAddEdit);
         utils.clickElement(addNew);
         utils.selectFromDropdown(stateDropdown, "value", utils.getStateCode(packageID));
@@ -174,10 +176,11 @@ public class StateEarlyAlert {
         utils.sendKeys(proposedDate, proposedEffectiveDate);
         utils.clickElement(save);
         utils.isVisible(successMessage);
+        logger.info("Successfully created waiver package: {} in SEATool.", packageID);
         utils.safelyAcceptAlert();
-        logger.info("Successfully created package: {} in SEATool.", packageID);
     }
     public void requestRAI(String packageID, String initialSubDate, String proposedEffDate, String raiRequestDate) {
+        login();
         logger.info("Creating SPA in SEATool and Requesting RAI...");
         utils.clickElement(seaAddEdit);
         utils.clickElement(addNew);
@@ -205,6 +208,7 @@ public class StateEarlyAlert {
     }
 
     public void updatePackageStatus(String packageID, String status) {
+        login();
         logger.info("Updating package status in SEATool to {}", status);
         utils.clickElement(seaAddEdit);
         utils.sendKeys(searchId, packageID);
@@ -218,21 +222,7 @@ public class StateEarlyAlert {
         utils.safelyAcceptAlert();
         logger.info("Successfully updated package status to: {}", status);
         ExcelPackageTracker.updateStatus(packageID,status);
-    }
-    public void updateStatus(String packageID, String status) {
-        logger.info("Updating package status in SEATool to {}", status);
-        utils.clickElement(seaAddEdit);
-        utils.sendKeys(searchId, packageID);
-        utils.clickElement(spaButton);
-        utils.waitForNumberOfElementsToBe(statePlanGrid, 1);
-        utils.clickElement(editStateAction);
-        utils.sendKeys(approvedEffecDate, utils.getInitialSubmissionDate());
-        utils.selectFromDropdown(completionStatus, "text", status);
-        utils.clickElement(save);
-        utils.isVisible(successMessage);
-        utils.safelyAcceptAlert();
-        logger.info("Successfully updated package status to: {}", status);
-        ExcelPackageTracker.updateStatus(packageID,status);
+
     }
 
     public void markPackageApproved(String packageID) {

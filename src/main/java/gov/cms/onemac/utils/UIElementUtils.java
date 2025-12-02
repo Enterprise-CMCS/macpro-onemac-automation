@@ -148,7 +148,7 @@ public class UIElementUtils {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
 
         try {
-            // If spinner exists → wait for it to go invisible
+            // If spinner exists  wait for it to go invisible
             wait.until(ExpectedConditions.invisibilityOfElementLocated(spinner));
         } catch (TimeoutException | NoSuchElementException ignored) {
             // Spinner never appeared  continue
@@ -158,6 +158,23 @@ public class UIElementUtils {
     public void waitForNumberOfElementsToBe(By locator, int num) {
         wait.until(ExpectedConditions.numberOfElementsToBe(locator, num));
     }
+    public void waitForSingleRecordAndClick() {
+        By pageLocation = By.cssSelector("[data-testid='page-location']");
+        By firstRowLink = By.xpath("//tbody/tr[1]/td[2]/a");
+        wait.until(d -> {
+            try {
+                String raw = driver.findElement(pageLocation).getText();
+                // Normalize: replace newline with space, collapse multiple spaces
+                String normalized = raw.replace("\n", " ").replaceAll("\\s+", " ").trim();
+                return normalized.equals("1 - 1 of 1 records");
+            } catch (Exception e) {
+                return false;
+            }
+        });
+        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(firstRowLink));
+        link.click();
+    }
+
 
     public String extractDay(String dateString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
@@ -254,7 +271,7 @@ public class UIElementUtils {
         Duration originalImplicitWait = driver.manage().timeouts().getImplicitWaitTimeout();
 
         try {
-            // temporarily disable implicit wait
+            // decrease implicit wait
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
 
             long endTime = System.currentTimeMillis() + (timeoutSeconds * 1000);
@@ -283,6 +300,7 @@ public class UIElementUtils {
         }
     }
 
+
     public void safelyAcceptAlert() {
         try {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
@@ -304,6 +322,10 @@ public class UIElementUtils {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public void clearInput(By locator){
+        driver.findElement(locator).clear();
     }
 
     public void sendKeys(By locator, String text) {

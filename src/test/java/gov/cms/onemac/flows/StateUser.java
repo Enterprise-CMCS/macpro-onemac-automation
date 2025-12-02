@@ -2,7 +2,6 @@ package gov.cms.onemac.flows;
 
 import gov.cms.onemac.models.SpaPackage;
 import gov.cms.onemac.pages.DashboardPage;
-import gov.cms.onemac.pages.SubmitMedicaidSpaPage;
 import gov.cms.onemac.utils.PageFactory;
 import gov.cms.onemac.utils.UIElementUtils;
 import org.apache.logging.log4j.LogManager;
@@ -42,8 +41,8 @@ public class StateUser {
         return PageFactory.getLoginPage(driver, utils).loginAsStateUser();
     }
 
-    public void submitWaiver1915c(String waiverAmendment, String amendmentTitle, String proposedEffectiveDate) {
-        PageFactory.getDashboardPage(driver, utils).submitWaiver1915c(waiverAmendment, amendmentTitle, proposedEffectiveDate);
+    public String submitWaiver1915cAppendixK(String amendmentTitle, String proposedEffectiveDate) {
+       return PageFactory.getDashboardPage(driver, utils).submitWaiver1915cAppendixK(amendmentTitle, proposedEffectiveDate);
     }
 
     public void navigateToOneMac() {
@@ -51,35 +50,28 @@ public class StateUser {
         driver.get(utils.getOneMACEnv());
     }
 
-    public void submitPackage(SpaPackage spa, String effDate) {
-        PageFactory.getDashboardPage(driver, utils).submitPackage(spa, effDate);
+    public SpaPackage submitNewStateAmendmentSPA(String state, String authority) {
+        return  PageFactory.getDashboardPage(driver, utils).submitNewStateAmendmentSPA(state, authority);
     }
-    public void submitMedicaidSPA(String state, String authority) {
-        PageFactory.getDashboardPage(driver, utils).submitMedicaidSpa(state, authority);
-    }
-    public void submitWaiver(String waiverID) {
-        PageFactory.getDashboardPage(driver, utils).submitWaiver(waiverID, utils.getInitialSubmissionDate());
-    }
-
-    public SubmitMedicaidSpaPage verifySpaSubmitted(SpaPackage spaPackage) {
-        return PageFactory.getSubmitMedicaidSpaPage(driver, utils).isSpaSubmitted(spaPackage);
+    public String createFFSSelectiveContractingInitialWaiver(){
+       return PageFactory.getDashboardPage(driver, utils).createFFSSelectiveContractingInitialWaiver();
     }
 
     public DashboardPage withdrawPackage(SpaPackage spaPackage, String additionalInfo) {
         navigateToOneMac();
         return PageFactory.getDashboardPage(driver, utils)
-                .openPackage(spaPackage)
+                .openSpaPackage(spaPackage)
                 .withdrawPackage(additionalInfo);
     }
 
     public void openPackage(SpaPackage spaPackage) {
         PageFactory.getDashboardPage(driver, utils)
-                .openPackage(spaPackage);
+                .openSpaPackage(spaPackage);
     }
 
     public void openWaiverPackage(String waiver) {
         PageFactory.getDashboardPage(driver, utils)
-                .openWaiver(waiver);
+                .openWaiverPackage(waiver);
     }
 
     public void uploadSubsequentDocuments(String text) {
@@ -158,5 +150,37 @@ public class StateUser {
 
     public boolean isCoverLetterPresent() {
         return utils.isVisible(coverLetter);
+    }
+
+    public boolean isSPATabVisible() {
+      return PageFactory.getDashboardPage(driver,utils).isSPATabVisible();
+    }
+
+    public boolean isSPATabClickable() {
+        return PageFactory.getDashboardPage(driver,utils).isSPATabClickable();
+    }
+    public boolean isNewSubmissionAvailable() {
+        return PageFactory.getDashboardPage(driver,utils).isNewSubmissionAvailable();
+    }
+    public boolean isWaiverTabVisible() {
+        return PageFactory.getDashboardPage(driver,utils).isWaiverTabVisible();
+    }
+    public String getPageTitle(){
+        return PageFactory.getDashboardPage(driver,utils).getPageTitle();
+    }
+    public boolean isHomeTabVisible(){
+        return PageFactory.getDashboardPage(driver,utils).isHomeTabVisible();
+    }
+    public boolean isDashboardVisible(){
+        return PageFactory.getDashboardPage(driver,utils).isDashboardVisible();
+    }
+    public boolean isHomePageClickable(){
+        return PageFactory.getDashboardPage(driver,utils).isHomePageClickable();
+    }
+    public boolean isDashboardClickable(){
+        return PageFactory.getDashboardPage(driver,utils).isDashboardClickable();
+    }
+    public boolean isViewFAQsPageVisible(){
+        return PageFactory.getviewFAQsPage(driver,utils).isViewFAQsTabVisible();
     }
 }

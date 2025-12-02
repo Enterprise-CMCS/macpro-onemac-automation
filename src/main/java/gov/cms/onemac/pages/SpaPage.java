@@ -39,7 +39,7 @@ public class SpaPage {
         this.driver = driver;
         this.ui = ui;
     }
-public void submitNewStateAmendmentSPA(String state, String authority){
+public SpaPackage submitNewStateAmendmentSPA(String state, String authority){
     logger.info("Navigating To OneMAC...");
     driver.get(ui.getOneMACEnv());
     PageFactory.getLoginPage(driver,ui).loginAsStateUser();
@@ -60,15 +60,9 @@ public void submitNewStateAmendmentSPA(String state, String authority){
         ExcelPackageTracker.updateStatus(spa.getPackageId(), "Submitted");
     }
     PageFactory.getDashboardPage(driver, ui);
+    return spa;
 }
-    public SpaPage openSpaTypePage() {
-        ui.clickElement(SPA_TITLE);
-        return new SpaPage(driver, ui);
-    }
-    public MedicaidSpaType selectMedicaidSpa() {
-        ui.clickElement(medicaidSPA);
-        return new MedicaidSpaType(driver, ui);
-    }
+
 
    /* public SubmitMedicaidSpaPage allOtherMedicaidSpa() {
         ui.clickElement(allOtherMedicaidSpa);

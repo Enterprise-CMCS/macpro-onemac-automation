@@ -17,15 +17,19 @@ public class PageFactory {
         return new StateEarlyAlert(driver, ui);
     }
 
-    public static SubmitMedicaidSpaPage getSubmitMedicaidSpaPage(WebDriver driver, UIElementUtils ui) {
-        return new SubmitMedicaidSpaPage(driver, ui);
-    }
-
     public static HomePage getHomePage(WebDriver driver, UIElementUtils ui) {
         return new HomePage(driver, ui);
     }
-    public static SpaPage getSpaTypePage(WebDriver driver, UIElementUtils ui) {
+
+    public static SpaPage getSpaPage(WebDriver driver, UIElementUtils ui) {
         return new SpaPage(driver, ui);
     }
 
+    public static WaiverPage getWaiverPage(WebDriver driver, UIElementUtils ui) {
+        return new WaiverPage(driver, ui);
+    }
+
+    public static ViewFAQsPage getviewFAQsPage(WebDriver driver, UIElementUtils ui) {
+        return new ViewFAQsPage(driver, ui);
+    }
 }
