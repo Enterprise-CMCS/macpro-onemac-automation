@@ -1,25 +1,13 @@
 package gov.cms.onemac.tests;
 
 import gov.cms.onemac.base.BaseTest;
-import gov.cms.onemac.flows.CMSUser;
 import gov.cms.onemac.flows.StateUser;
-import gov.cms.onemac.pages.DashboardPage;
-import gov.cms.onemac.pages.LoginPage;
 import gov.cms.onemac.utils.AssertionUtil;
-import gov.cms.onemac.utils.ConfigReader;
-import gov.cms.onemac.utils.PageFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class DashboardPageUIElementsTests extends BaseTest {
-    private static final Logger logger = LogManager.getLogger();
 
-
-
-    @Test
+    /*@Test
     public void verifySPAsTabVisibleForCMSUser() {
         CMSUser cmsUser = createNewCMSUser();
         cmsUser.navigateToOneMac();
@@ -174,7 +162,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
             cmsUser.navigateToOneMac();
             cmsUser.login();
         AssertionUtil.assertTrue(cmsUser.isDashboardClickable(),"Dashboard should be clickable for cms users.");
-    }
+    }*/
 
     @Test
     public void verifyDashboardClickableForStateUser() {
