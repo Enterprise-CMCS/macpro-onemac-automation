@@ -14,8 +14,8 @@ jobs:
       STATE_PASSWORD: ${{ secrets.STATE_PASSWORD }}
       CMS_USERNAME: ${{ secrets.CMS_USERNAME }}
       CMS_PASSWORD: ${{ secrets.CMS_PASSWORD }}
-      SEA_USERNAME: ${{ secrets.CMS_USERNAME }}
-      SEA_PASSWORD: ${{ secrets.CMS_PASSWORD }}
+      SEA_USERNAME: ${{ secrets.SEA_USERNAME }}
+      SEA_PASSWORD: ${{ secrets.SEA_PASSWORD }}
 
     steps:
       - name: Checkout repository
