@@ -43,7 +43,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
         );
     }
 
-   /* @Test
+    @Test
     public void verifyRaiIssuedWorkflow() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
@@ -619,8 +619,8 @@ public class PackageLifecycleE2ETests extends BaseTest {
         );
     }
 
-    @Test
-    public void dataGeneratorTest() {
+ //   @Test
+ //   public void dataGeneratorTest() {
         //   PackagePoolGenerator.generate(List.of("MD","CO","AL","NY"));
 //Generate  SPA package
 // SpaPackage spaPackage = SpaGenerator.createSpa("MD", "Medicaid SPA");
@@ -631,7 +631,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
 
 
 //Generate Renewal based on approved initial
-  *//*     WaiverPackage parent = ExcelPackageSelector.selectWaiver("CO", "1915(b)","");
+   /*    WaiverPackage parent = ExcelPackageSelector.selectWaiver("CO", "1915(b)","");
 
         List<String> existing = ExcelPackageTracker.readAllIds(parent.getState());
 
@@ -640,12 +640,12 @@ public class PackageLifecycleE2ETests extends BaseTest {
         ExcelPackageTracker.appendNewPackage(
                 "Waiver", parent.getState(), parent.getAuthority(), "Renewal",
                 renewalId, "", parent.getPackageId()
-        );*//*
+        );
 
 //Generate Renewal based on approved renewal
         //*WaiverPackage parent = ExcelPackageSelector.selectUnapprovedRenewal("MD", "1915(b)");
 
-      *//*  List<String> existing = ExcelPackageTracker.readAllIds(parent.getState());
+        List<String> existing = ExcelPackageTracker.readAllIds(parent.getState());
 
         String renewalId = WaiverIdGenerator.nextRenewal(parent.getPackageId(), existing);
 
@@ -653,9 +653,9 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 "Waiver", parent.getState(), parent.getAuthority(), "Renewal",
                 renewalId, "", parent.getPackageId()
         );
-*//*
+
 //Generate Temporary Extension based on approved initial
-     *//*   WaiverPackage parent = ExcelPackageSelector.selectApprovedInitial("MD", "1915(b)");
+        WaiverPackage parent = ExcelPackageSelector.selectApprovedInitial("MD", "1915(b)");
 
         String te = ExcelPackageTracker.nextTemporaryExtensionId(parent.getPackageId());
 
@@ -663,37 +663,37 @@ public class PackageLifecycleE2ETests extends BaseTest {
         ExcelPackageTracker.appendNewPackage(
                 "Waiver", parent.getState(), parent.getAuthority(), "Temporary Extension",
                 te, "", parent.getPackageId()
-        );*//*
+        );
 
 //Generate Temporary Extension based on approved renewal
-  *//*       WaiverPackage parent = ExcelPackageSelector.selectApprovedRenewal("MD", "1915(b)");
+         WaiverPackage parent = ExcelPackageSelector.selectApprovedRenewal("MD", "1915(b)");
 
         String te = ExcelPackageTracker.nextTemporaryExtensionId(parent.getPackageId());
 
         ExcelPackageTracker.appendNewPackage(
                 "Waiver", parent.getState(), parent.getAuthority(), "Temporary Extension",
                 te, "", parent.getPackageId()
-        );*//*
+        );
 
 //Generate amendment based on an approved initial
-     *//*   WaiverPackage parent = ExcelPackageSelector.selectApprovedInitial("MD", "1915(b)");
+        WaiverPackage parent = ExcelPackageSelector.selectApprovedInitial("MD", "1915(b)");
 
         String amendment = ExcelPackageTracker.nextAmendmentFromParent(parent.getPackageId());
 
         ExcelPackageTracker.appendNewPackage(
                 "Waiver", parent.getState(), parent.getAuthority(), "Amendment",
                 amendment, "", parent.getPackageId()
-        );*//*
+        );
 
 //Generate amendment based on an approved renewal
-  *//*     WaiverPackage parent = ExcelPackageSelector.selectApprovedRenewal("MD", "1915(b)");
+       WaiverPackage parent = ExcelPackageSelector.selectApprovedRenewal("MD", "1915(b)");
 
         String amendment = ExcelPackageTracker.nextAmendmentFromParent(parent.getPackageId());
 
         ExcelPackageTracker.appendNewPackage(
                 "Waiver", parent.getState(), parent.getAuthority(), "Amendment",
                 amendment, "", parent.getPackageId()
-        );*//*
+        );
     }*/
 
 }
