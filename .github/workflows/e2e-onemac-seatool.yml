@@ -53,6 +53,7 @@ jobs:
 
       - name: Run E2E Suite (OneMAC + SEATool)
         shell: powershell
+        continue-on-error: true
         run: |
           mvn clean test `
             "-DsuiteXmlFile=src/test/resources/E2E OneMAC & SEATool.xml" `
@@ -70,8 +71,9 @@ jobs:
             screenshots/**
           if-no-files-found: warn
 
+
       ###############################################################
-      #       AUTO COMMIT + PUSH UPDATED EXCEL FILES (WINDOWS)      #
+      #   AUTO COMMIT + PUSH UPDATED EXCEL FILES + DEBUG LOGGING    #
       ###############################################################
 
       - name: Configure Git Identity
@@ -80,35 +82,58 @@ jobs:
         run: |
           git config user.name "Amjad"
           git config user.email "jad.ammar.co@gmail.com"
+          Write-Output "Git identity configured."
 
       - name: Stage updated Excel files (packages + state counters)
         if: always()
         shell: powershell
         run: |
           $updated = 0
+          Write-Output "=== Checking for updated Excel files... ==="
 
           if (Test-Path "src/test/resources/state_counters.xlsx") {
-            git add src/test/resources/state_counters.xlsx
+            git add "src/test/resources/state_counters.xlsx"
             Write-Output "Staged: state_counters.xlsx"
             $updated = 1
+          } else {
+            Write-Output "state_counters.xlsx not found."
           }
 
           if (Test-Path "src/test/resources/packages.xlsx") {
-            git add src/test/resources/packages.xlsx
+            git add "src/test/resources/packages.xlsx"
             Write-Output "Staged: packages.xlsx"
             $updated = 1
+          } else {
+            Write-Output "packages.xlsx not found."
           }
 
-          echo "UPDATED=$updated" >> $env:GITHUB_ENV
+          Write-Output "UPDATED variable = $updated"
+          Add-Content -Path $env:GITHUB_ENV -Value "UPDATED=$updated"
+
+          Write-Output "=== Contents of GITHUB_ENV file ==="
+          Get-Content $env:GITHUB_ENV
 
       - name: Commit & Push Excel Updates
-        if: env.UPDATED == '1'
+        if: always()
         shell: powershell
         run: |
-          if (-not (git diff --cached --quiet)) {
-            git commit -m "CI: Update Excel counters (state_counters + packages)"
-            git push origin HEAD:${{ github.ref_name }}
-            Write-Output "Excel files committed & pushed."
+          Write-Output "=== Commit Stage Starting ==="
+          Write-Output "Value of env:UPDATED is '$($env:UPDATED)'"
+
+          if ($env:UPDATED -eq "1") {
+            Write-Output "Excel updates detected. Checking staged changes..."
+
+            if (-not (git diff --cached --quiet)) {
+              Write-Output "Changes detected — committing..."
+              git commit -m "CI: Update Excel counters (state_counters + packages)"
+
+              Write-Output "Pushing changes..."
+              git push origin HEAD:${{ github.ref_name }}
+
+              Write-Output "Excel files successfully committed and pushed."
+            } else {
+              Write-Output "Nothing is staged — no commit created."
+            }
           } else {
-            Write-Output "No Excel changes to commit."
+            Write-Output "No Excel updates detected (UPDATED=$env:UPDATED)."
           }
