@@ -43,7 +43,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
         );
     }
 
- /*   @Test
+    @Test
     public void verifyRaiIssuedWorkflow() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
@@ -612,7 +612,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 isStateUnsubmitted,
                 "State user should see the package status as 'Unsubmitted'."
         );
-    }*/
+    }
 
  //   @Test
  //   public void dataGeneratorTest() {
