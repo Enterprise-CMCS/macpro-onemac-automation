@@ -1,5 +1,5 @@
 name: E2E - OneMAC & SEATool (Self-Hosted with Zscaler)
-run-name: "E2E - OneMAC & SEATool"
+run-name: "E2E - OneMAC & SEATool Test Suite"
 
 on:
   push:

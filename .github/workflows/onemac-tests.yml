@@ -1,5 +1,5 @@
 name: OneMAC-Automation Test Suite (GitHub Hosted)
-run-name: "OneMAC"
+run-name: "OneMAC Test Suite"
 
 on:
   push:
