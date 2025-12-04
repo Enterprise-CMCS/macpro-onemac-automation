@@ -25,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # IMPORTANT so pushing works
+          fetch-depth: 0   # Allows pushing back to repo
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -53,7 +53,7 @@ jobs:
 
       - name: Run E2E Suite (OneMAC + SEATool)
         shell: powershell
-        continue-on-error: true
+        continue-on-error: true  # Continue even if tests fail
         run: |
           mvn clean test `
             "-DsuiteXmlFile=src/test/resources/E2E OneMAC & SEATool.xml" `
@@ -125,7 +125,7 @@ jobs:
 
             if (-not (git diff --cached --quiet)) {
               Write-Output "Changes detected — committing..."
-              git commit -m "CI: Update Excel counters (state_counters + packages)"
+              git commit -m 'CI: Update Excel counters (state_counters + packages)'
 
               Write-Output "Pushing changes..."
               git push origin HEAD:${{ github.ref_name }}
