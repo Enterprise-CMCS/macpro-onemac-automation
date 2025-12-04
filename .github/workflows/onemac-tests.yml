@@ -6,9 +6,6 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: write    # REQUIRED so CI can push Excel updates
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -22,8 +19,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # IMPORTANT: allows CI to push back to repo
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -67,44 +62,3 @@ jobs:
             extent-report/**
             screenshots/**
           if-no-files-found: warn
-
-      #############################################################
-      #   EXCEL UPDATE + COMMIT + PUSH (STATE + PACKAGES)        #
-      #############################################################
-
-      - name: Configure Git for pushing changes
-        if: always()    # run even if tests failed—they may have updated counters
-        run: |
-          git config user.name "Amjad"
-          git config user.email "jad.ammar.co@gmail.com"
-
-      - name: Stage updated Excel files
-        if: always()
-        run: |
-          UPDATED=0
-
-          if [ -f src/test/resources/state_counters.xlsx ]; then
-            git add src/test/resources/state_counters.xlsx
-            echo "State counters staged."
-            UPDATED=1
-          fi
-
-          if [ -f src/test/resources/packages.xlsx ]; then
-            git add src/test/resources/packages.xlsx
-            echo "Packages sheet staged."
-            UPDATED=1
-          fi
-
-          echo "UPDATED=$UPDATED" >> $GITHUB_ENV
-
-      - name: Commit & Push Excel changes
-        if: env.UPDATED == '1'
-        run: |
-          # Only commit if changes are actually staged
-          if ! git diff --cached --quiet; then
-            git commit -m "CI: Update Excel source-of-truth (counters & packages)"
-            git push origin HEAD:${{ github.ref_name }}
-            echo "Excel files updated & pushed to main."
-          else
-            echo "No Excel changes to commit."
-          fi
