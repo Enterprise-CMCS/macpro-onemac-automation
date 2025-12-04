@@ -104,22 +104,45 @@ public class UIElementUtils {
     public void clickElement(By locator) {
         if (isClickable(locator)) {
             try {
+                // Try normal click first
                 driver.findElement(locator).click();
+                return;
             } catch (ElementClickInterceptedException e) {
-                System.out.println("Click intercepted, retrying with JavaScript: " + e.getMessage());
-                try {
-                    WebElement element = driver.findElement(locator);
-                    JavascriptExecutor js = (JavascriptExecutor) driver;
-                    js.executeScript("arguments[0].click();", element);
-                    System.out.println("JavaScript click performed successfully.");
-                } catch (Exception jsEx) {
-                    System.out.println("JavaScript click failed: " + jsEx.getMessage());
-                }
+                logger.info("Normal click intercepted: {}", e.getMessage());
+            } catch (Exception e) {
+                logger.info("Normal click failed: {}", e.getMessage());
             }
+
+            // -------------------------
+            // Actions Click Fallback
+            // -------------------------
+            try {
+                WebElement element = driver.findElement(locator);
+                Actions actions = new Actions(driver);
+                actions.moveToElement(element).click().perform();
+               logger.info("Actions click performed successfully.");
+                return;
+            } catch (Exception actionsEx) {
+                logger.info("Actions click failed: {}", actionsEx.getMessage());
+            }
+
+            // -------------------------
+            // JavaScript Click Fallback
+            // -------------------------
+            try {
+                WebElement element = driver.findElement(locator);
+                JavascriptExecutor js = (JavascriptExecutor) driver;
+                js.executeScript("arguments[0].click();", element);
+                logger.info("JavaScript click performed successfully.");
+            } catch (Exception jsEx) {
+                logger.info("JavaScript click failed: {}", jsEx.getMessage());
+            }
+
         } else {
-            System.out.println("Element not clickable: " + locator);
+            logger.info("Element not clickable: {}", locator);
         }
     }
+
 
     public void saveSpa(By locator) {
         clickElement(locator);

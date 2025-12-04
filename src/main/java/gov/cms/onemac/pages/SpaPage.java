@@ -44,6 +44,7 @@ public SpaPackage submitNewStateAmendmentSPA(String state, String authority){
     driver.get(ui.getOneMACEnv());
     PageFactory.getLoginPage(driver,ui).loginAsStateUser();
     PageFactory.getDashboardPage(driver,ui).selectNewSubmission();
+    logger.info("Submitting new {}...", authority);
     ui.clickElement(SPA_TITLE);
     ui.clickElement(medicaidSPA);
     ui.clickElement(allOtherMedicaidSpa);
