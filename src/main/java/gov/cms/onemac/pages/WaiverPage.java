@@ -99,7 +99,7 @@ public class WaiverPage {
         uploadAttachment();
         submitPackage();
         if (isSubmitted()) {
-            logger.info("Successfully submitted Spa: {} in OneMAC.", waiverId);
+            logger.info("Successfully submitted Waiver: {} in OneMAC.", waiverId);
             ExcelPackageTracker.updateStatus(waiverId, "Submitted");
         }
         return waiverId;

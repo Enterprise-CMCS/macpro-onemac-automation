@@ -119,21 +119,21 @@ jobs:
         run: |
           Write-Output "=== Commit Stage Starting ==="
           Write-Output "Value of env:UPDATED is '$($env:UPDATED)'"
-
+          
           if ($env:UPDATED -eq "1") {
             Write-Output "Excel updates detected. Checking staged files..."
-
+          
             if (-not (git diff --cached --quiet)) {
-              Write-Output "Changes detected — committing..."
+              Write-Output "Changes detected - committing..."
               git commit -m 'CI: Update Excel counters (state_counters + packages)'
-
+          
               Write-Output "Pushing changes..."
               git push origin HEAD:${{ github.ref_name }}
-
+          
               Write-Output "Excel files successfully committed and pushed."
             }
             else {
-              Write-Output "No staged changes — skipping commit."
+              Write-Output "No staged changes - skipping commit."
             }
           }
           else {
