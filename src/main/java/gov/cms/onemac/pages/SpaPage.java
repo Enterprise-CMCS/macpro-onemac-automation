@@ -55,6 +55,7 @@ public SpaPackage submitNewStateAmendmentSPA(String state, String authority){
     ui.oneMACCalendarHandler(ui.getProposedEffectiveDate());
     ui.uploadFileAndCommit(CMS179Form, filePath);
     ui.uploadFileAndCommit(spaPages, filePath);
+    ui.waitForElementToBeStableAndEnabled(saveSpa,300,10);
     ui.saveSpa(saveSpa);
     if (isSubmitted()) {
         logger.info("Successfully submitted Spa: {} in OneMAC.", spa.getPackageId());

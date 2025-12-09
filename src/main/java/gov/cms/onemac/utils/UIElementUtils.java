@@ -166,6 +166,42 @@ public class UIElementUtils {
             return false;
         }
     }
+    public boolean waitForElementToBeStableAndEnabled(By locator, int stableMillis, int timeoutSeconds) {
+        long endTime = System.currentTimeMillis() + timeoutSeconds * 1000;
+
+        while (System.currentTimeMillis() < endTime) {
+            try {
+                WebElement el = driver.findElement(locator);
+
+                // must be enabled first
+                if (!el.isEnabled())
+                    continue;
+
+                // now verify stable state
+                long stabilityStart = System.currentTimeMillis();
+                boolean stable = true;
+
+                while (System.currentTimeMillis() - stabilityStart < stableMillis) {
+                    WebElement check = driver.findElement(locator);
+                    if (!check.isEnabled()) {
+                        stable = false;
+                        break; // button flickered, restart
+                    }
+                    Thread.sleep(50);
+                }
+
+                if (stable)
+                    return true; // element is truly ready
+
+            } catch (StaleElementReferenceException ignored) {
+                // React re-rendering — retry
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        return false; // element never stabilized
+    }
 
     public void waitForThreeDotsLoadingToDisappear() {
         By loader = By.cssSelector("div[data-testid='three-dots-loading']");
