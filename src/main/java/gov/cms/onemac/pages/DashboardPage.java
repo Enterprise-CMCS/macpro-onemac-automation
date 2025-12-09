@@ -125,6 +125,7 @@ public class DashboardPage {
     }
 
     public DashboardPage openSpaPackage(SpaPackage spaPackage) {
+        utils.waitForThreeDotsLoadingToDisappear();
         utils.clickElement(dashboardTab);
         utils.clearInput(SEARCH_FIELD);
         utils.sendKeys(SEARCH_FIELD, spaPackage.getPackageId());

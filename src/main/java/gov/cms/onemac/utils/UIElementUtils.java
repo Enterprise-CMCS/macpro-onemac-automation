@@ -167,16 +167,34 @@ public class UIElementUtils {
         }
     }
 
-    public void waitForSpinnerToDisappear(By spinner, int timeoutSeconds) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
+    public void waitForThreeDotsLoadingToDisappear() {
+        By loader = By.cssSelector("div[data-testid='three-dots-loading']");
+        Duration originalWait = driver.manage().timeouts().getImplicitWaitTimeout();
 
         try {
-            // If spinner exists  wait for it to go invisible
-            wait.until(ExpectedConditions.invisibilityOfElementLocated(spinner));
-        } catch (TimeoutException | NoSuchElementException ignored) {
-            // Spinner never appeared  continue
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.pollingEvery(Duration.ofMillis(300));
+
+            wait.until(d -> {
+                List<WebElement> loaders = d.findElements(loader);
+
+                // not present → done
+                if (loaders.isEmpty()) return true;
+
+                // present but not visible → done
+                return loaders.stream().noneMatch(WebElement::isDisplayed);
+            });
+
+        } catch (Exception ignored) {
+            // Optional: log timeout but do not fail test
+        } finally {
+            // Restore global implicit wait (15s)
+            driver.manage().timeouts().implicitlyWait(originalWait);
         }
     }
+
 
     public void waitForNumberOfElementsToBe(By locator, int num) {
         wait.until(ExpectedConditions.numberOfElementsToBe(locator, num));
