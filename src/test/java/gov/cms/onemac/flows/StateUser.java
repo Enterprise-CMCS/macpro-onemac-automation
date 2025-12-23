@@ -53,6 +53,9 @@ public class StateUser {
     public SpaPackage submitNewStateAmendmentSPA(String state, String authority) {
         return  PageFactory.getDashboardPage(driver, utils).submitNewStateAmendmentSPA(state, authority);
     }
+    public SpaPackage submitNewStateAmendmentCHIPSPA(String state, String authority) {
+        return  PageFactory.getDashboardPage(driver, utils).submitNewStateAmendmentCHIPSPA(state, authority);
+    }
     public String createFFSSelectiveContractingInitialWaiver(){
        return PageFactory.getDashboardPage(driver, utils).createFFSSelectiveContractingInitialWaiver();
     }

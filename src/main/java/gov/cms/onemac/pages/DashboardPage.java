@@ -109,6 +109,9 @@ public class DashboardPage {
     public SpaPackage submitNewStateAmendmentSPA(String state, String authority) {
         return PageFactory.getSpaPage(driver, utils).submitNewStateAmendmentSPA(state, authority);
     }
+    public SpaPackage submitNewStateAmendmentCHIPSPA(String state, String authority) {
+        return PageFactory.getSpaPage(driver, utils).submitNewStateAmendmentCHIPSPA(state, authority);
+    }
 
     public String createFFSSelectiveContractingInitialWaiver() {
      return PageFactory.getWaiverPage(driver,utils).createFFSSelectiveContractingInitialWaiver();

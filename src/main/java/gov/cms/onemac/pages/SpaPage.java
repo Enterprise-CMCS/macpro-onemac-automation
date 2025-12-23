@@ -18,13 +18,20 @@ public class SpaPage {
     private static final By SPA_TITLE =
             By.xpath("//h2[text()='State Plan Amendment (SPA)']/ancestor::a");
     private By medicaidSPA = By.xpath("//p[text()=\"Submit a new Medicaid State Plan Amendment\"]/ancestor::a");
+    private By chipSPA = By.xpath("//p[text()=\"Submit a new CHIP State Plan Amendment\"]/ancestor::a");
     private By allOtherMedicaidSpa = By.xpath("//h2[text()=\"All Other Medicaid SPA Submissions\"]/ancestor::a");
+    private By allOtherChipSPA = By.xpath("//h2[text()=\"All Other CHIP SPA Submissions\"]/ancestor::a");
+
     private By spaIDField = By.id("spa-id");
 
     private By medicaidSpaCalendar = By.cssSelector("button[data-testid=\"proposedEffectiveDate-datepicker\"]");
 
     private By CMS179Form = By.xpath("//label[text()=\"CMS-179 Form\"]/following-sibling::div/input");
 
+    private By currentStatePlan = By.xpath("//label[text()=\"Current State Plan\"]/following-sibling::div/input");
+
+    private By amendedStatePlanLanguage = By.xpath("//label[text()=\"Amended State Plan Language\"]/following-sibling::div/input");
+    private By coverLetter = By.xpath("//label[text()=\"Cover Letter\"]/following-sibling::div/input");
     private By spaPages = By.xpath("//label[text()=\"SPA Pages\"]/following-sibling::div/input");
 
     private By saveSpa = By.cssSelector("button[data-testid=\"submit-action-form\"]");
@@ -39,32 +46,59 @@ public class SpaPage {
         this.driver = driver;
         this.ui = ui;
     }
-public SpaPackage submitNewStateAmendmentSPA(String state, String authority){
-    logger.info("Navigating To OneMAC...");
-    driver.get(ui.getOneMACEnv());
-    PageFactory.getLoginPage(driver,ui).loginAsStateUser();
-    PageFactory.getDashboardPage(driver,ui).selectNewSubmission();
-    logger.info("Submitting new {}...", authority);
-    ui.clickElement(SPA_TITLE);
-    ui.clickElement(medicaidSPA);
-    ui.clickElement(allOtherMedicaidSpa);
-    SpaPackage spa = SpaGenerator.createSpa(state, authority);
-    ui.sendKeys(spaIDField, spa.getPackageId());
-    ui.javaScriptClicker(medicaidSpaCalendar);
-    ui.selectFromDropdown(months, "text", ui.getProposedEffectiveDate());
-    ui.oneMACCalendarHandler(ui.getProposedEffectiveDate());
-    ui.uploadFileAndCommit(CMS179Form, filePath);
-    ui.uploadFileAndCommit(spaPages, filePath);
-    ui.waitForElementToBeStableAndEnabled(saveSpa,300,10);
-    ui.saveSpa(saveSpa);
-    if (isSubmitted()) {
-        logger.info("Successfully submitted Spa: {} in OneMAC.", spa.getPackageId());
-        ExcelPackageTracker.updateStatus(spa.getPackageId(), "Submitted");
-    }
-    PageFactory.getDashboardPage(driver, ui);
-    return spa;
-}
 
+    public SpaPackage submitNewStateAmendmentSPA(String state, String authority) {
+        logger.info("Navigating To OneMAC...");
+        driver.get(ui.getOneMACEnv());
+        PageFactory.getLoginPage(driver, ui).loginAsStateUser();
+        PageFactory.getDashboardPage(driver, ui).selectNewSubmission();
+        logger.info("Submitting new {}...", authority);
+        ui.clickElement(SPA_TITLE);
+        ui.clickElement(medicaidSPA);
+        ui.clickElement(allOtherMedicaidSpa);
+        SpaPackage spa = SpaGenerator.createSpa(state, authority);
+        ui.sendKeys(spaIDField, spa.getPackageId());
+        ui.javaScriptClicker(medicaidSpaCalendar);
+        ui.selectFromDropdown(months, "text", ui.getProposedEffectiveDate());
+        ui.oneMACCalendarHandler(ui.getProposedEffectiveDate());
+        ui.uploadFileAndCommit(CMS179Form, filePath);
+        ui.uploadFileAndCommit(spaPages, filePath);
+        ui.waitForElementToBeStableAndEnabled(saveSpa, 300, 10);
+        ui.saveSpa(saveSpa);
+        if (isSubmitted()) {
+            logger.info("Successfully submitted Spa: {} in OneMAC.", spa.getPackageId());
+            ExcelPackageTracker.updateStatus(spa.getPackageId(), "Submitted");
+        }
+        PageFactory.getDashboardPage(driver, ui);
+        return spa;
+    }
+
+    public SpaPackage submitNewStateAmendmentCHIPSPA(String state, String authority) {
+        logger.info("Navigating To OneMAC...");
+        driver.get(ui.getOneMACEnv());
+        PageFactory.getLoginPage(driver, ui).loginAsStateUser();
+        PageFactory.getDashboardPage(driver, ui).selectNewSubmission();
+        logger.info("Submitting new {}...", authority);
+        ui.clickElement(SPA_TITLE);
+        ui.clickElement(chipSPA);
+        ui.clickElement(allOtherChipSPA);
+        SpaPackage spa = SpaGenerator.createSpa(state, authority);
+        ui.sendKeys(spaIDField, spa.getPackageId());
+        ui.javaScriptClicker(medicaidSpaCalendar);
+        ui.selectFromDropdown(months, "text", ui.getProposedEffectiveDate());
+        ui.oneMACCalendarHandler(ui.getProposedEffectiveDate());
+        ui.uploadFileAndCommit(currentStatePlan, filePath);
+        ui.uploadFileAndCommit(amendedStatePlanLanguage, filePath);
+        ui.uploadFileAndCommit(coverLetter, filePath);
+        ui.waitForElementToBeStableAndEnabled(saveSpa, 300, 10);
+        ui.saveSpa(saveSpa);
+        if (isSubmitted()) {
+            logger.info("Successfully submitted Spa: {} in OneMAC.", spa.getPackageId());
+            ExcelPackageTracker.updateStatus(spa.getPackageId(), "Submitted");
+        }
+        PageFactory.getDashboardPage(driver, ui);
+        return spa;
+    }
 
    /* public SubmitMedicaidSpaPage allOtherMedicaidSpa() {
         ui.clickElement(allOtherMedicaidSpa);
