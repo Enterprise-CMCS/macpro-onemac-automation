@@ -1,7 +1,6 @@
 package gov.cms.onemac.pages;
 
 import gov.cms.onemac.utils.ConfigReader;
-import gov.cms.onemac.utils.ExcelPackageSelector;
 import gov.cms.onemac.utils.ExcelPackageTracker;
 import gov.cms.onemac.utils.UIElementUtils;
 import org.apache.logging.log4j.LogManager;
@@ -22,7 +21,7 @@ public class StateEarlyAlert {
     private By seaUsername = By.cssSelector("input[id=\"UserName\"]");
     private By seaPassword = By.id("Password");
     private By logOn = By.cssSelector("input[value=\"Log On\"]");
-//Waivers
+    //Waivers
     private By actionType = By.id("Action_Type");
     //create package
     private By stateDropdown = By.id("State_Code");
@@ -36,6 +35,11 @@ public class StateEarlyAlert {
     private By serviceSubType = By.id("Service_SubType_ID");
     private By addSubTypeBtn = By.id("AddServiceSubType");
 
+    //Priority Information
+    private By prComments = By.name("Priority_Comments_Memo");
+    private By prComplexity = By.id("Priority_Complexity_ID");
+    private By prOCDLevel = By.id("Review_Position_ID");
+
     //Reviewing Entities
     private By leadAnalystID = By.id("Lead_Analyst_ID");
 
@@ -44,7 +48,7 @@ public class StateEarlyAlert {
     private By summaryMemo = By.id("Summary_Memo");
     //Approval/Effective/Expiration Dates
     private By proposedDate = By.id("Proposed_Date");
-    private  By approvedEffecDate = By.id("Approved_Effective_Date");
+    private By approvedEffecDate = By.id("Approved_Effective_Date");
     //Request for Additional Information locators
 
     private By addRAI = By.id("addRAI");
@@ -151,8 +155,9 @@ public class StateEarlyAlert {
         utils.isVisible(successMessage);
         utils.safelyAcceptAlert();
         logger.info("Successfully created SPA Package: {} in SEATool.", packageID);
-        ExcelPackageTracker.updateStatus(packageID,"Under Review");
+        ExcelPackageTracker.updateStatus(packageID, "Under Review");
     }
+
     public void createWaiverPackage(String packageID, String initialSubDate, String proposedEffectiveDate) {
         login();
         logger.info("Creating waiver package: {} in SEATool...", packageID);
@@ -165,7 +170,7 @@ public class StateEarlyAlert {
         utils.sendKeys(initSubDate, Keys.TAB);
         utils.clickElement(confirmSave);
         utils.clickElement(statePlanWaiverConfirm);
-        utils.selectFromDropdown(actionType,"text","Amend");
+        utils.selectFromDropdown(actionType, "text", "Amend");
         utils.selectFromDropdown(type, "text", "1915(c) Waivers Do Not Use");
         utils.clickElement(typeBtn);
         utils.selectFromDropdown(serviceSubType, "text", "Other Do Not Use");
@@ -179,21 +184,27 @@ public class StateEarlyAlert {
         logger.info("Successfully created waiver package: {} in SEATool.", packageID);
         utils.safelyAcceptAlert();
     }
-    public void requestRAI(String packageID, String initialSubDate, String proposedEffDate, String raiRequestDate) {
+
+    public void requestRAI(String packageID, String initialSubDate, String proposedEffDate, String raiRequestDate, String spaAuthority, String svcType, String svcSubType) {
         login();
         logger.info("Creating SPA in SEATool and Requesting RAI...");
         utils.clickElement(seaAddEdit);
         utils.clickElement(addNew);
         utils.selectFromDropdown(stateDropdown, "value", utils.getStateCode(packageID));
         utils.sendKeys(idNumber, utils.removeStateCode(packageID));
-        utils.selectFromDropdown(authority, "text", "Medicaid SPA");
+        utils.selectFromDropdown(authority, "text", spaAuthority);
         utils.sendKeys(initSubDate, initialSubDate);
         utils.sendKeys(initSubDate, Keys.TAB);
         utils.clickElement(confirmSave);
         utils.clickElement(statePlanWaiverConfirm);
-        utils.selectFromDropdown(type, "text", "Health Homes");
+        if (spaAuthority.contains("CHIP")) {
+         utils.sendKeys(prComments,"Test PR Comments Memo");
+         utils.selectFromDropdown(prComplexity,"text","1 - Low Complexity");
+         utils.selectFromDropdown(prOCDLevel,"text","P1a - Center Director Signs");
+        }
+        utils.selectFromDropdown(type, "text", svcType);
         utils.clickElement(typeBtn);
-        utils.selectFromDropdown(serviceSubType, "text", "Regular");
+        utils.selectFromDropdown(serviceSubType, "text", svcSubType);
         utils.clickElement(addSubTypeBtn);
         utils.selectFromDropdown(leadAnalystID, "text", "Test2, Test1");
         utils.sendKeys(subject, "Subject Test");
@@ -221,7 +232,7 @@ public class StateEarlyAlert {
         utils.isVisible(successMessage);
         utils.safelyAcceptAlert();
         logger.info("Successfully updated package status to: {}", status);
-        ExcelPackageTracker.updateStatus(packageID,status);
+        ExcelPackageTracker.updateStatus(packageID, status);
 
     }
 
@@ -232,12 +243,12 @@ public class StateEarlyAlert {
         utils.clickElement(spaButton);
         utils.waitForNumberOfElementsToBe(statePlanGrid, 1);
         utils.clickElement(editStateAction);
-        utils.selectFromDropdown(ocdGroupDirector,"text","Yes");
+        utils.selectFromDropdown(ocdGroupDirector, "text", "Yes");
         utils.clickElement(save);
         utils.isVisible(successMessage);
         utils.safelyAcceptAlert();
         logger.info("Successfully marked package {} as Approved in SEATool.", packageID);
-        ExcelPackageTracker.updateStatus(packageID,"Approved");
+        ExcelPackageTracker.updateStatus(packageID, "Approved");
     }
 
 

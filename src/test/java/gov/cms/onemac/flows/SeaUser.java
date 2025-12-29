@@ -25,9 +25,9 @@ public class SeaUser {
         PageFactory.getStateEarlyAlertPage(driver, utils).navigateToSEATool();
     }
 
-    public void requestRai(SpaPackage spa, String initialSubDate, String proposedEffDate,String raiRequestDate) {
+    public void requestRai(SpaPackage spa, String initialSubDate, String proposedEffDate,String raiRequestDate,String spaAuthority, String svcType, String svcSubType ) {
         PageFactory.getStateEarlyAlertPage(driver, utils)
-                .requestRAI(spa.getPackageId(), initialSubDate,proposedEffDate, raiRequestDate);
+                .requestRAI(spa.getPackageId(), initialSubDate,proposedEffDate, raiRequestDate,spaAuthority,svcType, svcSubType);
     }
 
     public void createSPAPackage(SpaPackage spa, String initialDate, String proposedEffectiveDate) {

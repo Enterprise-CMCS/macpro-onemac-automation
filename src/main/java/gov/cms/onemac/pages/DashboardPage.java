@@ -44,6 +44,8 @@ public class DashboardPage {
     private By withdrawPackage = By.linkText("Withdraw Package");
     private By uploadSubsequentDocuments = By.linkText("Upload Subsequent Documents");
     private By coverLetter = By.xpath("//label[text()=\"Cover Letter\"]/following-sibling::div/input");
+    private By revisedStatePlanLanguage = By.xpath("//label[text()=\"Revised Amended State Plan Language\"]/following-sibling::div/input");
+    private By officialRAIResponse = By.xpath("//label[text()=\"Official RAI Response\"]/following-sibling::div/input");
     private By reasonForSubsequentDocuments = By.tagName("textArea");
     private By documentsSubmitted = By.xpath("//h3[text()=\"Documents submitted\"]");
     private final By SEARCH_FIELD =
@@ -70,9 +72,14 @@ public class DashboardPage {
         return new HomePage(driver, utils);
     }
 
-    public void respondToRAI() {
+    public void respondToRAI(String authority) {
         utils.clickElement(respondToRAI);
-        utils.uploadFile(filePath, raiResponseLetter);
+        if(authority.contains("CHIP")){
+            utils.uploadFile(filePath,revisedStatePlanLanguage);
+            utils.uploadFile(filePath,officialRAIResponse);
+        }else{
+            utils.uploadFile(filePath, raiResponseLetter);
+        }
         utils.clickElement(submit);
         utils.clickElement(confirmSubmission);
         utils.isVisible(raiResponseSuccess);
@@ -109,6 +116,7 @@ public class DashboardPage {
     public SpaPackage submitNewStateAmendmentSPA(String state, String authority) {
         return PageFactory.getSpaPage(driver, utils).submitNewStateAmendmentSPA(state, authority);
     }
+
     public SpaPackage submitNewStateAmendmentCHIPSPA(String state, String authority) {
         return PageFactory.getSpaPage(driver, utils).submitNewStateAmendmentCHIPSPA(state, authority);
     }

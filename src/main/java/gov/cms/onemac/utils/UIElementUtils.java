@@ -402,7 +402,7 @@ public class UIElementUtils {
     }
 
     public void clearInput(By locator){
-        driver.findElement(locator).click();
+     //   driver.findElement(locator).click();
         driver.findElement(locator).sendKeys(Keys.CONTROL + "a");
         driver.findElement(locator).sendKeys(Keys.DELETE);
     }

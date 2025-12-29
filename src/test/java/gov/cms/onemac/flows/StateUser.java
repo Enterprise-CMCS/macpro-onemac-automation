@@ -124,8 +124,8 @@ public class StateUser {
         return utils.refreshUntilVisible(raiIssued, TIME_OUT);
     }
 
-    public void respondToRAI() {
-        PageFactory.getDashboardPage(driver, utils).respondToRAI();
+    public void respondToRAI(String authority) {
+        PageFactory.getDashboardPage(driver, utils).respondToRAI(authority);
     }
 
     public boolean isFormalRaiLinkVisible() {
