@@ -26,4 +26,9 @@ public class AuthenticationTests extends BaseTest {
         // Add assertion
     }
 
+    @Test
+    public void ss(){
+        SeaUser seaUser = createNewSeaUser();
+        seaUser.login();
+    }
 }

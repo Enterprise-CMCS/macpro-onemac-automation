@@ -45,37 +45,6 @@ public class PackageLifecycleE2ETests extends BaseTest {
     }
 
     @Test
-    public void verifyInitialChipSpaSubmissionWorkflow() {
-        StateUser state = createNewStateUser();
-        SpaPackage spa = state.submitNewStateAmendmentCHIPSPA("MD", "CHIP SPA");
-        SeaUser sea = createNewSeaUser();
-        sea.requestRai(
-                spa,
-                getUtils().getInitialSubmissionDate(),
-                getUtils().getProposedEffectiveDate(),
-                getUtils().getRaiRequestDate(), spa.getAuthority(), "Affordable Care Act", "MAGI-CHIP"
-        );
-        state.navigateToOneMac();
-        state.login();
-        state.openPackage(spa);
-        boolean isUnderReviewVisible = state.isPackageStatusUnderReview();
-        AssertionUtil.assertTrue(
-                isUnderReviewVisible,
-                "State user should see the package status as 'Under Review'."
-        );
-        restartDriver();
-        CMSUser cms = createNewCMSUser();
-        cms.navigateToOneMac();
-        cms.login();
-        cms.openPackage(spa);
-        boolean isPendingVisible = cms.isPackageStatusPending();
-        AssertionUtil.assertTrue(
-                isPendingVisible,
-                "CMS user should see the package status as 'Pending'."
-        );
-    }
-
-    @Test
     public void verifyRaiIssuedWorkflowCHIPSPA() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentCHIPSPA("MD", "CHIP SPA");

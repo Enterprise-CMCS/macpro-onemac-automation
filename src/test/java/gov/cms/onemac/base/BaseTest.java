@@ -59,12 +59,12 @@ public class BaseTest {
         return new SeaUser(getDriver(),getUtils());
     }
 
-    @AfterMethod(alwaysRun = true)
+/*    @AfterMethod(alwaysRun = true)
     public void cleanUp() {
         WebDriver d = driver.get();
         if (d != null) {
             d.quit();
             driver.remove();
         }
-    }
+    }*/
 }

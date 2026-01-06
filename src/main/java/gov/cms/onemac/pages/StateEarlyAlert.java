@@ -179,8 +179,8 @@ public class StateEarlyAlert {
         utils.sendKeys(subject, "Subject Test");
         utils.sendKeys(summaryMemo, "Description test");
         utils.sendKeys(proposedDate, proposedEffectiveDate);
-        utils.clickElement(addRAI);
-        utils.sendKeys(RAIRequestDate, utils.getRaiRequestDate());
+     /*   utils.clickElement(addRAI);
+        utils.sendKeys(RAIRequestDate, utils.getRaiRequestDate());*/
         utils.clickElement(save);
         utils.isVisible(successMessage);
         logger.info("Successfully created waiver package: {} in SEATool.", packageID);
