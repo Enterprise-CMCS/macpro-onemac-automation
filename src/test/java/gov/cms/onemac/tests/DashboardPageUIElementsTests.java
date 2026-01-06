@@ -3,10 +3,68 @@ package gov.cms.onemac.tests;
 import gov.cms.onemac.base.BaseTest;
 import gov.cms.onemac.flows.CMSUser;
 import gov.cms.onemac.flows.StateUser;
+import gov.cms.onemac.models.SpaPackage;
+import gov.cms.onemac.models.WaiverPackage;
 import gov.cms.onemac.utils.AssertionUtil;
+import gov.cms.onemac.utils.ExcelPackageSelector;
+import gov.cms.onemac.utils.PageFactory;
 import org.testng.annotations.Test;
 
 public class DashboardPageUIElementsTests extends BaseTest {
+
+    @Test
+    public void searchForWaiver() {
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        WaiverPackage waiverPackage = ExcelPackageSelector.selectWaiver("MD", "1915(c)", "Amendment", "Submitted");
+        cmsUser.searchForWaiver(waiverPackage.getPackageId());
+        AssertionUtil.assertTrue(PageFactory.getDashboardPage(getDriver(), getUtils()).isPackageFound(waiverPackage.getPackageId()), "Package should be displayed in the Dashboard.");
+    }
+
+    @Test
+    public void searchForSPA() {
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        SpaPackage spa = ExcelPackageSelector.selectSpa("MD", "Medicaid SPA", "Submitted");
+        cmsUser.searchForSPA(spa.getPackageId());
+        AssertionUtil.assertTrue(PageFactory.getDashboardPage(getDriver(), getUtils()).isPackageFound(spa.getPackageId()), "Package should be displayed in the Dashboard.");
+    }
+
+    @Test
+    public void verifyShowColumn() {
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        cmsUser.selectColumn("Final Disposition");
+        AssertionUtil.assertTrue(PageFactory.getDashboardPage(getDriver(), getUtils()).columnDisplayed("Final Disposition"), "Final Disposition should be visible.");
+    }
+
+    @Test
+    public void verifyHideColumn() {
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        cmsUser.selectColumn("Authority");
+        AssertionUtil.assertTrue(PageFactory.getDashboardPage(getDriver(), getUtils()).columnHidden("Authority"), "Authority should be hidden.");
+    }
+
+    @Test
+    public void verifyFilters() {
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.filterByState("TX"),"All states have been validated");
+    }
+
+    @Test
+    public void verifyExport() throws Exception {
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        cmsUser.verifyExport();
+    }
 
     @Test
     public void verifySPAsTabVisibleForCMSUser() {
@@ -16,11 +74,11 @@ public class DashboardPageUIElementsTests extends BaseTest {
         AssertionUtil.assertTrue(cmsUser.isSPATabVisible(), "SPAs tab should be visible on dashboard.");
     }
 
-  @Test
+    @Test
     public void verifySPAsTabVisibleForStateUser() {
-      StateUser stateUser = createNewStateUser();
-      stateUser.navigateToOneMac();
-      stateUser.login();
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
         AssertionUtil.assertTrue(stateUser.isSPATabVisible(), "SPAs tab should be visible on dashboard.");
     }
 
@@ -72,12 +130,12 @@ public class DashboardPageUIElementsTests extends BaseTest {
         AssertionUtil.assertTrue(cmsUser.isWaiverTabVisible(), "Waiver tab should be visible on dashboard for cms users.");
     }
 
-   @Test
+    @Test
     public void verifyPageTitleIsCorrectForStateUser() {
-       StateUser stateUser = createNewStateUser();
-       stateUser.navigateToOneMac();
-       stateUser.login();
-       AssertionUtil.assertEquals(stateUser.getPageTitle(), "OneMAC","Page title should be 'OneMAC'.");
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        AssertionUtil.assertEquals(stateUser.getPageTitle(), "OneMAC", "Page title should be 'OneMAC'.");
 
     }
 
@@ -86,17 +144,17 @@ public class DashboardPageUIElementsTests extends BaseTest {
         CMSUser cmsUser = createNewCMSUser();
         cmsUser.navigateToOneMac();
         cmsUser.login();
-        AssertionUtil.assertEquals(cmsUser.getPageTitle(), "OneMAC","Page title should be 'OneMAC'.");
+        AssertionUtil.assertEquals(cmsUser.getPageTitle(), "OneMAC", "Page title should be 'OneMAC'.");
 
 
     }
 
-   @Test
+    @Test
     public void verifyHomeTabVisibleForCMSUser() {
-       CMSUser cmsUser = createNewCMSUser();
-       cmsUser.navigateToOneMac();
-       cmsUser.login();
-       AssertionUtil.assertTrue(cmsUser.isHomeTabVisible(),"Home tab should be visible for cms users.");
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isHomeTabVisible(), "Home tab should be visible for cms users.");
     }
 
     @Test
@@ -104,7 +162,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
         StateUser stateUser = createNewStateUser();
         stateUser.navigateToOneMac();
         stateUser.login();
-        AssertionUtil.assertTrue(stateUser.isHomeTabVisible(),"Home tab should be visible for state users.");
+        AssertionUtil.assertTrue(stateUser.isHomeTabVisible(), "Home tab should be visible for state users.");
     }
 
 
@@ -113,7 +171,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
         StateUser stateUser = createNewStateUser();
         stateUser.navigateToOneMac();
         stateUser.login();
-        AssertionUtil.assertTrue(stateUser.isDashboardVisible(),"Dashboard should be visible for state users.");
+        AssertionUtil.assertTrue(stateUser.isDashboardVisible(), "Dashboard should be visible for state users.");
     }
 
     @Test
@@ -121,7 +179,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
         CMSUser cmsUser = createNewCMSUser();
         cmsUser.navigateToOneMac();
         cmsUser.login();
-        AssertionUtil.assertTrue(cmsUser.isDashboardVisible(),"Dashboard tab should be visible for cms users.");
+        AssertionUtil.assertTrue(cmsUser.isDashboardVisible(), "Dashboard tab should be visible for cms users.");
     }
 
     @Test
@@ -129,7 +187,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
         CMSUser cmsUser = createNewCMSUser();
         cmsUser.navigateToOneMac();
         cmsUser.login();
-       AssertionUtil.assertTrue(cmsUser.isViewFAQsPageVisible(),"View FAQs tab should be visible for cms users.");
+        AssertionUtil.assertTrue(cmsUser.isViewFAQsPageVisible(), "View FAQs tab should be visible for cms users.");
     }
 
     @Test
@@ -137,7 +195,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
         StateUser stateUser = createNewStateUser();
         stateUser.navigateToOneMac();
         stateUser.login();
-        AssertionUtil.assertTrue(stateUser.isViewFAQsPageVisible(),"View FAQs tab should be visible for state users.");
+        AssertionUtil.assertTrue(stateUser.isViewFAQsPageVisible(), "View FAQs tab should be visible for state users.");
     }
 
 
@@ -146,7 +204,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
         StateUser stateUser = createNewStateUser();
         stateUser.navigateToOneMac();
         stateUser.login();
-        AssertionUtil.assertTrue(stateUser.isHomePageClickable(),"Home page should be clickable for state users.");
+        AssertionUtil.assertTrue(stateUser.isHomePageClickable(), "Home page should be clickable for state users.");
     }
 
     @Test
@@ -154,15 +212,15 @@ public class DashboardPageUIElementsTests extends BaseTest {
         CMSUser cmsUser = createNewCMSUser();
         cmsUser.navigateToOneMac();
         cmsUser.login();
-        AssertionUtil.assertTrue(cmsUser.isHomePageClickable(),"Home Page should be clickable for cms users.");
+        AssertionUtil.assertTrue(cmsUser.isHomePageClickable(), "Home Page should be clickable for cms users.");
     }
 
     @Test
     public void verifyDashboardClickableForCmsUser() {
-            CMSUser cmsUser = createNewCMSUser();
-            cmsUser.navigateToOneMac();
-            cmsUser.login();
-        AssertionUtil.assertTrue(cmsUser.isDashboardClickable(),"Dashboard should be clickable for cms users.");
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        AssertionUtil.assertTrue(cmsUser.isDashboardClickable(), "Dashboard should be clickable for cms users.");
     }
 
     @Test
@@ -170,7 +228,7 @@ public class DashboardPageUIElementsTests extends BaseTest {
         StateUser stateUser = createNewStateUser();
         stateUser.navigateToOneMac();
         stateUser.login();
-        AssertionUtil.assertTrue(stateUser.isDashboardClickable(),"Dashboard page should be clickable for state users.");
+        AssertionUtil.assertTrue(stateUser.isDashboardClickable(), "Dashboard page should be clickable for state users.");
     }
 }
 

@@ -2,6 +2,7 @@ package gov.cms.onemac.tests;
 
 import gov.cms.onemac.base.BaseTest;
 import gov.cms.onemac.flows.CMSUser;
+import gov.cms.onemac.flows.SeaUser;
 import gov.cms.onemac.flows.StateUser;
 import org.testng.annotations.Test;
 
@@ -9,11 +10,11 @@ import org.testng.annotations.Test;
 public class AuthenticationTests extends BaseTest {
 
 
-   @Test
+    @Test
     public void stateUserCanLogin() {
-       StateUser stateUser = createNewStateUser();
-       stateUser.navigateToOneMac();
-       stateUser.login();
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
         // Add assertion
     }
 

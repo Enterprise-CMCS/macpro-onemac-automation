@@ -51,6 +51,31 @@ public class CMSUser {
                 .openWaiverPackage(waiver);
     }
 
+    public void searchForWaiver(String waiver) {
+        PageFactory.getDashboardPage(driver, utils)
+                .searchWaiver(waiver);
+    }
+
+    public void searchForSPA(String spa) {
+        PageFactory.getDashboardPage(driver, utils)
+                .searchForSPA(spa);
+    }
+
+    public void selectColumn(String columnName) {
+        PageFactory.getDashboardPage(driver, utils)
+                .selectColumn(columnName);
+    }
+    public void verifyExport() throws Exception {
+        PageFactory.getDashboardPage(driver, utils)
+                .verifyExport();
+    }
+
+    public boolean filterByState(String state){
+        return PageFactory.getDashboardPage(driver, utils)
+                .filterByState(state);
+
+    }
+
     public boolean isPackageStatusPendingConcurrence() {
         return utils.refreshUntilVisible(statusPendingConcurrence, TIME_OUT);
     }
@@ -74,7 +99,6 @@ public class CMSUser {
     public boolean isPackageStatusWithdrawn() {
         return utils.refreshUntilVisible(packageWithdrawn, TIME_OUT);
     }
-
 
 
     public boolean isStatusSubmittedIntakeNeeded() {
@@ -104,36 +128,47 @@ public class CMSUser {
     }
 
     public boolean isSPATabVisible() {
-     return PageFactory.getDashboardPage(driver,utils).isSPATabVisible();
+        return PageFactory.getDashboardPage(driver, utils).isSPATabVisible();
     }
+
+    public boolean isWaiverFound(String waiverID) {
+        return PageFactory.getDashboardPage(driver, utils).isPackageFound(waiverID);
+
+    }
+
     public boolean isSPATabClickable() {
-        return PageFactory.getDashboardPage(driver,utils).isSPATabClickable();
+        return PageFactory.getDashboardPage(driver, utils).isSPATabClickable();
     }
+
     public boolean isNewSubmissionNotAvailable() {
-        return PageFactory.getDashboardPage(driver,utils).isNewSubmissionNotAvailable();
+        return PageFactory.getDashboardPage(driver, utils).isNewSubmissionNotAvailable();
     }
+
     public boolean isWaiverTabVisible() {
-        return PageFactory.getDashboardPage(driver,utils).isWaiverTabVisible();
+        return PageFactory.getDashboardPage(driver, utils).isWaiverTabVisible();
     }
 
-    public String getPageTitle(){
-        return PageFactory.getDashboardPage(driver,utils).getPageTitle();
-    }
-    public boolean isHomeTabVisible(){
-        return PageFactory.getDashboardPage(driver,utils).isHomeTabVisible();
+    public String getPageTitle() {
+        return PageFactory.getDashboardPage(driver, utils).getPageTitle();
     }
 
-    public boolean isDashboardVisible(){
-        return PageFactory.getDashboardPage(driver,utils).isDashboardVisible();
-    }
-    public boolean isHomePageClickable(){
-        return PageFactory.getDashboardPage(driver,utils).isHomePageClickable();
-    }
-    public boolean isDashboardClickable(){
-        return PageFactory.getDashboardPage(driver,utils).isDashboardClickable();
+    public boolean isHomeTabVisible() {
+        return PageFactory.getDashboardPage(driver, utils).isHomeTabVisible();
     }
 
-    public boolean isViewFAQsPageVisible(){
-        return PageFactory.getviewFAQsPage(driver,utils).isViewFAQsTabVisible();
+    public boolean isDashboardVisible() {
+        return PageFactory.getDashboardPage(driver, utils).isDashboardVisible();
+    }
+
+    public boolean isHomePageClickable() {
+        return PageFactory.getDashboardPage(driver, utils).isHomePageClickable();
+    }
+
+    public boolean isDashboardClickable() {
+        return PageFactory.getDashboardPage(driver, utils).isDashboardClickable();
+    }
+
+    public boolean isViewFAQsPageVisible() {
+        return PageFactory.getviewFAQsPage(driver, utils).isViewFAQsTabVisible();
     }
 }

@@ -7,6 +7,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.time.*;
@@ -19,11 +20,13 @@ public class UIElementUtils {
 
     private static final Logger logger = LogManager.getLogger();
 
-    private String proposedEffectiveDate = getPastBusinessDate(7);
-    private String initialSubmissionDate = getPastBusinessDate(7);
-    private String raiRequestDate = getPastBusinessDate(7);
-    private String raiResponseDate = getPastBusinessDate(7);
-    private String raiResponseWithdrawnDate = getPastBusinessDate(3);
+    private String proposedEffectiveDate = getPastBusinessDate(14);
+    private String initialSubmissionDate = getPastBusinessDate(14);
+    private String raiRequestDate = getPastBusinessDate(12);
+    private String raiResponseDate = getPastBusinessDate(10);
+    private String raiResponseWithdrawnDate = getPastBusinessDate(7);
+    private String secondRaiRequestDate = getPastBusinessDate(5);
+
     private WebDriver driver;
 
     public String getProposedEffectiveDate() {
@@ -36,6 +39,10 @@ public class UIElementUtils {
 
     public String getRaiRequestDate() {
         return raiRequestDate;
+    }
+
+    public String getSecondRaiRequestDate() {
+        return secondRaiRequestDate;
     }
 
     public String getRaiResponseDate() {
@@ -120,7 +127,7 @@ public class UIElementUtils {
                 WebElement element = driver.findElement(locator);
                 Actions actions = new Actions(driver);
                 actions.moveToElement(element).click().perform();
-               logger.info("Actions click performed successfully.");
+                logger.info("Actions click performed successfully.");
                 return;
             } catch (Exception actionsEx) {
                 logger.info("Actions click failed: {}", actionsEx.getMessage());
@@ -142,7 +149,6 @@ public class UIElementUtils {
             logger.info("Element not clickable: {}", locator);
         }
     }
-
 
     public void saveSpa(By locator) {
         clickElement(locator);
@@ -166,6 +172,7 @@ public class UIElementUtils {
             return false;
         }
     }
+
     public boolean waitForElementToBeStableAndEnabled(By locator, int stableMillis, int timeoutSeconds) {
         long endTime = System.currentTimeMillis() + timeoutSeconds * 1000;
 
@@ -235,6 +242,7 @@ public class UIElementUtils {
     public void waitForNumberOfElementsToBe(By locator, int num) {
         wait.until(ExpectedConditions.numberOfElementsToBe(locator, num));
     }
+
     public void waitForSingleRecordAndClick() {
         By pageLocation = By.cssSelector("[data-testid='page-location']");
         By firstRowLink = By.xpath("//tbody/tr[1]/td[2]/a");
@@ -304,6 +312,7 @@ public class UIElementUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         return LocalDate.now().format(formatter);
     }
+
     public boolean refreshUntilInvisible(By locator, int timeoutSeconds) {
         // Store original implicit wait
         Duration originalImplicitWait = driver.manage().timeouts().getImplicitWaitTimeout();
@@ -401,8 +410,8 @@ public class UIElementUtils {
         }
     }
 
-    public void clearInput(By locator){
-     //   driver.findElement(locator).click();
+    public void clearInput(By locator) {
+        //   driver.findElement(locator).click();
         driver.findElement(locator).sendKeys(Keys.CONTROL + "a");
         driver.findElement(locator).sendKeys(Keys.DELETE);
     }

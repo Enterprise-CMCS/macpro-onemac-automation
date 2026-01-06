@@ -5,18 +5,16 @@ import gov.cms.onemac.flows.CMSUser;
 import gov.cms.onemac.flows.SeaUser;
 import gov.cms.onemac.flows.StateUser;
 import gov.cms.onemac.models.SpaPackage;
-import gov.cms.onemac.models.WaiverPackage;
-import gov.cms.onemac.utils.*;
+import gov.cms.onemac.utils.AssertionUtil;
+import gov.cms.onemac.utils.ExcelPackageTracker;
 import org.testng.annotations.Test;
-
-import java.util.List;
 
 
 public class PackageLifecycleE2ETests extends BaseTest {
 
 
     @Test
-    public void initialSubmissionWorkflow() {
+    public void verifyInitialMedicaidSpaSubmissionWorkflow() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
 
@@ -46,18 +44,17 @@ public class PackageLifecycleE2ETests extends BaseTest {
         );
     }
 
-   /* @Test
-    public void initialSubmissionWorkflowChipSPA() {
+    @Test
+    public void verifyInitialChipSpaSubmissionWorkflow() {
         StateUser state = createNewStateUser();
-        SpaPackage spa = ExcelPackageSelector.selectSpa("MD", "CHIP SPA", "Under Review");
-
-      *//*  SeaUser sea = createNewSeaUser();
-        sea.createSPAPackage(
+        SpaPackage spa = state.submitNewStateAmendmentCHIPSPA("MD", "CHIP SPA");
+        SeaUser sea = createNewSeaUser();
+        sea.requestRai(
                 spa,
                 getUtils().getInitialSubmissionDate(),
-                getUtils().getProposedEffectiveDate()
-        );*//*
-
+                getUtils().getProposedEffectiveDate(),
+                getUtils().getRaiRequestDate(), spa.getAuthority(), "Affordable Care Act", "MAGI-CHIP"
+        );
         state.navigateToOneMac();
         state.login();
         state.openPackage(spa);
@@ -76,7 +73,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 isPendingVisible,
                 "CMS user should see the package status as 'Pending'."
         );
-    }*/
+    }
 
     @Test
     public void verifyRaiIssuedWorkflowCHIPSPA() {
@@ -110,8 +107,8 @@ public class PackageLifecycleE2ETests extends BaseTest {
     }
 
 
-   /* @Test
-    public void testChipSPA() {
+    @Test
+    public void verifyRAIChipSpaRequestResponseWorkflow() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentCHIPSPA("MD", "CHIP SPA");
         SeaUser sea = createNewSeaUser();
@@ -150,29 +147,30 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 isIntakeNeededVisible,
                 "CMS user should see the package status as 'Submitted - Intake Needed'."
         );
-    }*/
-
-    @Test
-    public void verifyRaiIssuedWorkflow() {
-        StateUser state = createNewStateUser();
-        SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
-        SeaUser sea = createNewSeaUser();
-        sea.requestRai(
-                spa,
-                getUtils().getInitialSubmissionDate(),
-                getUtils().getProposedEffectiveDate(),
-                getUtils().getRaiRequestDate(), spa.getAuthority(), "Health Homes", "Regular"
-        );
+        // ---------- SEA: Add Response Received Date ----------
+        sea = createNewSeaUser();
+        sea.login();
+        sea.addResponseReceivedDate(spa, getUtils().getRaiResponseDate());
+        // ---------- CMS: Enable Formal RAI Response Withdrawal ----------
+        cms.navigateToOneMac();
+        cms.openPackage(spa);
+        boolean isEnableFormalRaiResponseLinkVisible = cms.isEnableFormalRAIResponseLinkVisible();
+        AssertionUtil.assertTrue(isEnableFormalRaiResponseLinkVisible, "Enable Formal RAI link should be visible CMS users.");
+        //Need code to add another RAI for this CHIP SPA
+        sea.navigateToSEATool();
+        sea.requestRaiForChipSPA(spa.getPackageId(), getUtils().getSecondRaiRequestDate());
+        restartDriver();
+        state = createNewStateUser();
         state.navigateToOneMac();
+        state.login();
         state.openPackage(spa);
-        boolean isRaiIssuedVisible = state.isRaiIssued();
+        boolean isRaiIssued = state.isRaiIssued();
         AssertionUtil.assertTrue(
-                isRaiIssuedVisible,
+                isRaiIssued,
                 "State user should see the package status indicating that an RAI has been issued."
         );
-        ExcelPackageTracker.updateStatus(spa.getPackageId(),"RAI Issued");
         restartDriver();
-        CMSUser cms = createNewCMSUser();
+        cms = createNewCMSUser();
         cms.navigateToOneMac();
         cms.login();
         cms.openPackage(spa);
@@ -181,54 +179,10 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 isPendingRaiVisible,
                 "CMS user should see the package status as 'Pending RAI'."
         );
-
     }
 
-
     @Test
-    public void verifyRaiResponseFlow() {
-        StateUser state = createNewStateUser();
-        SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
-        SeaUser sea = createNewSeaUser();
-        sea.requestRai(
-                spa,
-                getUtils().getInitialSubmissionDate(),
-                getUtils().getProposedEffectiveDate(),
-                getUtils().getRaiRequestDate(), spa.getAuthority(), "Health Homes", "Regular"
-        );
-        state.navigateToOneMac();
-        state.openPackage(spa);
-        boolean isRaiIssuedVisible = state.isRaiIssued();
-        AssertionUtil.assertTrue(
-                isRaiIssuedVisible,
-                "State user should see that an RAI has been issued."
-        );
-        boolean isFormalRaiLinkVisible = state.isFormalRaiLinkVisible();
-        AssertionUtil.assertTrue(
-                isFormalRaiLinkVisible,
-                "State user should see the 'Respond to Formal RAI' link."
-        );
-        state.respondToRAI(spa.getAuthority());
-        boolean isSubmittedAfterResponse = state.isPackageStatusSubmitted();
-        AssertionUtil.assertTrue(
-                isSubmittedAfterResponse,
-                "Package status should be updated to 'Submitted' after responding to RAI."
-        );
-        restartDriver();
-        CMSUser cms = createNewCMSUser();
-        cms.navigateToOneMac();
-        cms.login();
-        cms.openPackage(spa);
-        boolean isIntakeNeededVisible = cms.isStatusSubmittedIntakeNeeded();
-        AssertionUtil.assertTrue(
-                isIntakeNeededVisible,
-                "CMS user should see the package status as 'Submitted - Intake Needed'."
-        );
-    }
-
-
-    @Test
-    public void verifyEnableDisableRaiResponseWithdrawal() {
+    public void verifyRaiResponseWithdrawalEnableDisable() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
         SeaUser sea = createNewSeaUser();
@@ -304,9 +258,125 @@ public class PackageLifecycleE2ETests extends BaseTest {
         AssertionUtil.assertTrue(isRaiIssued, "State users should see status 'RAI Issued'.");
     }
 
+    @Test
+    public void verify1915cAppendixKWaiverAmendmentWorkflow() {
+        // ---------- Arrange ----------
+        StateUser state = createNewStateUser();
+        String amendment = state.submitWaiver1915cAppendixK("Test Amendment", getUtils().getProposedEffectiveDate());
+
+        SeaUser sea = createNewSeaUser();
+        sea.createWaiverPackage(
+                amendment, getUtils().getInitialSubmissionDate(),
+                getUtils().getProposedEffectiveDate()
+        );
+        state.navigateToOneMac();
+        state.openWaiverPackage(amendment);
+        boolean isRaiIssuedVisible = state.isRaiIssued();
+        AssertionUtil.assertTrue(
+                isRaiIssuedVisible,
+                "State user should see that an RAI has been issued."
+        );
+        boolean isFormalRaiLinkVisible = state.isFormalRaiLinkVisible();
+        AssertionUtil.assertTrue(
+                isFormalRaiLinkVisible,
+                "State user should see the 'Respond to Formal RAI' link."
+        );
+        state.respondToAppendixKWaiverRAI();
+        boolean isSubmittedAfterResponse = state.isPackageStatusSubmitted();
+        AssertionUtil.assertTrue(
+                isSubmittedAfterResponse,
+                "Package status should be updated to 'Submitted' after responding to RAI."
+        );
+        restartDriver();
+        CMSUser cms = createNewCMSUser();
+        cms.navigateToOneMac();
+        cms.login();
+        cms.openWaiverPackage(amendment);
+        boolean isIntakeNeededVisible = cms.isStatusSubmittedIntakeNeeded();
+        AssertionUtil.assertTrue(
+                isIntakeNeededVisible,
+                "CMS user should see the package status as 'Submitted - Intake Needed'."
+        );
+
+    }
 
     @Test
-    public void verifyWithdrawalRequestedPackageWithdrawnFlow() {
+    public void verifyRaiIssuedMedicaidSpaWorkflow() {
+        StateUser state = createNewStateUser();
+        SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
+        SeaUser sea = createNewSeaUser();
+        sea.requestRai(
+                spa,
+                getUtils().getInitialSubmissionDate(),
+                getUtils().getProposedEffectiveDate(),
+                getUtils().getRaiRequestDate(), spa.getAuthority(), "Health Homes", "Regular"
+        );
+        state.navigateToOneMac();
+        state.openPackage(spa);
+        boolean isRaiIssuedVisible = state.isRaiIssued();
+        AssertionUtil.assertTrue(
+                isRaiIssuedVisible,
+                "State user should see the package status indicating that an RAI has been issued."
+        );
+        ExcelPackageTracker.updateStatus(spa.getPackageId(), "RAI Issued");
+        restartDriver();
+        CMSUser cms = createNewCMSUser();
+        cms.navigateToOneMac();
+        cms.login();
+        cms.openPackage(spa);
+        boolean isPendingRaiVisible = cms.isStatusPendingRAI();
+        AssertionUtil.assertTrue(
+                isPendingRaiVisible,
+                "CMS user should see the package status as 'Pending RAI'."
+        );
+
+    }
+
+
+    @Test
+    public void verifyRaiResponseMedicaidSpaWorkflow() {
+        StateUser state = createNewStateUser();
+        SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
+        SeaUser sea = createNewSeaUser();
+        sea.requestRai(
+                spa,
+                getUtils().getInitialSubmissionDate(),
+                getUtils().getProposedEffectiveDate(),
+                getUtils().getRaiRequestDate(), spa.getAuthority(), "Health Homes", "Regular"
+        );
+        state.navigateToOneMac();
+        state.openPackage(spa);
+        boolean isRaiIssuedVisible = state.isRaiIssued();
+        AssertionUtil.assertTrue(
+                isRaiIssuedVisible,
+                "State user should see that an RAI has been issued."
+        );
+        boolean isFormalRaiLinkVisible = state.isFormalRaiLinkVisible();
+        AssertionUtil.assertTrue(
+                isFormalRaiLinkVisible,
+                "State user should see the 'Respond to Formal RAI' link."
+        );
+        state.respondToRAI(spa.getAuthority());
+        boolean isSubmittedAfterResponse = state.isPackageStatusSubmitted();
+        AssertionUtil.assertTrue(
+                isSubmittedAfterResponse,
+                "Package status should be updated to 'Submitted' after responding to RAI."
+        );
+        restartDriver();
+        CMSUser cms = createNewCMSUser();
+        cms.navigateToOneMac();
+        cms.login();
+        cms.openPackage(spa);
+        boolean isIntakeNeededVisible = cms.isStatusSubmittedIntakeNeeded();
+        AssertionUtil.assertTrue(
+                isIntakeNeededVisible,
+                "CMS user should see the package status as 'Submitted - Intake Needed'."
+        );
+    }
+
+
+    @Test
+    public void verifyWithdrawalRequestedPackageWithdrawnMedicaidSpaWorkflow() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
         SeaUser sea = createNewSeaUser();
@@ -724,14 +794,13 @@ public class PackageLifecycleE2ETests extends BaseTest {
         );
     }
 
-      @Test
-      public void dataGeneratorTest() {
-
-    //   PackagePoolGenerator.generate(List.of("MD","CO","AL","NY"));
-    //Generate  SPA package
+    @Test
+    public void dataGeneratorTest() {
+        //   PackagePoolGenerator.generate(List.of("MD","CO","AL","NY"));
+        //Generate  SPA package
 //paPackage spaPackage = SpaGenerator.createSpa("MD", "Medicaid SPA");
 
-   // String waiver = WaiverIdGenerator.nextInitial("MD");
+        // String waiver = WaiverIdGenerator.nextInitial("MD");
 
 //  System.out.println(spaPackage.getPackageId());
 
@@ -801,7 +870,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
         );
     }*/
 
-}
+    }
 }
 
 

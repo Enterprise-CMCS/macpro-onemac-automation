@@ -127,7 +127,9 @@ public class StateUser {
     public void respondToRAI(String authority) {
         PageFactory.getDashboardPage(driver, utils).respondToRAI(authority);
     }
-
+    public void respondToAppendixKWaiverRAI() {
+        PageFactory.getDashboardPage(driver, utils).respondToAppendixKWaiverRAI();
+    }
     public boolean isFormalRaiLinkVisible() {
         return utils.refreshUntilVisible(respondToRAI, TIME_OUT);
     }

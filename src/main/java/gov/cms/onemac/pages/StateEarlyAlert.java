@@ -53,7 +53,7 @@ public class StateEarlyAlert {
 
     private By addRAI = By.id("addRAI");
     private By RAIRequestDate = By.id("RAIs_0__RAI_Requested_Date");
-
+    private By secondRAIRequestDate = By.id("RAIs_1__RAI_Requested_Date");
     //Save
     private By save = By.cssSelector("input[value=\"Save\"]");
 
@@ -179,6 +179,8 @@ public class StateEarlyAlert {
         utils.sendKeys(subject, "Subject Test");
         utils.sendKeys(summaryMemo, "Description test");
         utils.sendKeys(proposedDate, proposedEffectiveDate);
+        utils.clickElement(addRAI);
+        utils.sendKeys(RAIRequestDate, utils.getRaiRequestDate());
         utils.clickElement(save);
         utils.isVisible(successMessage);
         logger.info("Successfully created waiver package: {} in SEATool.", packageID);
@@ -198,9 +200,9 @@ public class StateEarlyAlert {
         utils.clickElement(confirmSave);
         utils.clickElement(statePlanWaiverConfirm);
         if (spaAuthority.contains("CHIP")) {
-         utils.sendKeys(prComments,"Test PR Comments Memo");
-         utils.selectFromDropdown(prComplexity,"text","1 - Low Complexity");
-         utils.selectFromDropdown(prOCDLevel,"text","P1a - Center Director Signs");
+            utils.sendKeys(prComments, "Test PR Comments Memo");
+            utils.selectFromDropdown(prComplexity, "text", "1 - Low Complexity");
+            utils.selectFromDropdown(prOCDLevel, "text", "P1a - Center Director Signs");
         }
         utils.selectFromDropdown(type, "text", svcType);
         utils.clickElement(typeBtn);
@@ -216,6 +218,21 @@ public class StateEarlyAlert {
         utils.isVisible(successMessage);
         utils.safelyAcceptAlert();
         logger.info("Successfully created SPA: {} and requested RAI in SEATool.", packageID);
+    }
+
+    public void requestRaiForChipSpa(String spaId, String raiRequestDate) {
+        logger.info("Adding second RAI Date in SEATool for: {}", spaId);
+        utils.clickElement(seaAddEdit);
+        utils.sendKeys(searchId, spaId);
+        utils.clickElement(spaButton);
+        utils.waitForNumberOfElementsToBe(statePlanGrid, 1);
+        utils.clickElement(editStateAction);
+        utils.clickElement(addRAI);
+        utils.sendKeys(secondRAIRequestDate, raiRequestDate);
+        utils.clickElement(save);
+        utils.isVisible(successMessage);
+        utils.safelyAcceptAlert();
+        logger.info("Successfully Added second RAI Date as {} for SPA: {}.", raiRequestDate, spaId);
     }
 
     public void updatePackageStatus(String packageID, String status) {
