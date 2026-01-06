@@ -559,7 +559,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
 
 
     @Test
-    public void verifyWaiverTerminationFlow() {
+    public void verifyWaiverTerminationFlow(){
         // ---------- Arrange ----------
         StateUser state = createNewStateUser();
         String amendment = state.createFFSSelectiveContractingInitialWaiver();
