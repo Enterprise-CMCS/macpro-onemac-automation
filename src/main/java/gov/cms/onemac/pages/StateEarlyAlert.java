@@ -187,6 +187,35 @@ public class StateEarlyAlert {
         utils.safelyAcceptAlert();
     }
 
+    public void createAppendixKWaiverPackage(String packageID, String initialSubDate, String proposedEffectiveDate) {
+        login();
+        logger.info("Creating waiver package: {} in SEATool...", packageID);
+        utils.clickElement(seaAddEdit);
+        utils.clickElement(addNew);
+        utils.selectFromDropdown(stateDropdown, "value", utils.getStateCode(packageID));
+        utils.sendKeys(idNumber, utils.removeStateCode(packageID));
+        utils.selectFromDropdown(authority, "text", "1915(c)");
+        utils.sendKeys(initSubDate, initialSubDate);
+        utils.sendKeys(initSubDate, Keys.TAB);
+        utils.clickElement(confirmSave);
+        utils.clickElement(statePlanWaiverConfirm);
+        utils.selectFromDropdown(actionType, "text", "Amend");
+        utils.selectFromDropdown(type, "text", "1915(c) Waivers Do Not Use");
+        utils.clickElement(typeBtn);
+        utils.selectFromDropdown(serviceSubType, "text", "Other Do Not Use");
+        utils.clickElement(addSubTypeBtn);
+        utils.selectFromDropdown(leadAnalystID, "text", "Test2, Test1");
+        utils.sendKeys(subject, "Subject Test");
+        utils.sendKeys(summaryMemo, "Description test");
+        utils.sendKeys(proposedDate, proposedEffectiveDate);
+        utils.clickElement(addRAI);
+        utils.sendKeys(RAIRequestDate, utils.getRaiRequestDate());
+        utils.clickElement(save);
+        utils.isVisible(successMessage);
+        logger.info("Successfully created waiver package: {} in SEATool.", packageID);
+        utils.safelyAcceptAlert();
+    }
+
     public void requestRAI(String packageID, String initialSubDate, String proposedEffDate, String raiRequestDate, String spaAuthority, String svcType, String svcSubType) {
         login();
         logger.info("Creating SPA in SEATool and Requesting RAI...");

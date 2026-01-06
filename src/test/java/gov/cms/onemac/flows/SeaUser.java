@@ -44,6 +44,10 @@ public class SeaUser {
         PageFactory.getStateEarlyAlertPage(driver, utils)
                 .createWaiverPackage(waiver, initialDate, proposedEffectiveDate);
     }
+    public void createAppendixKWaiver(String waiver, String initialDate, String proposedEffectiveDate) {
+        PageFactory.getStateEarlyAlertPage(driver, utils)
+                .createAppendixKWaiverPackage(waiver, initialDate, proposedEffectiveDate);
+    }
 
     public void updatePackageStatus(SpaPackage spa, String status) {
         PageFactory.getStateEarlyAlertPage(driver, utils)

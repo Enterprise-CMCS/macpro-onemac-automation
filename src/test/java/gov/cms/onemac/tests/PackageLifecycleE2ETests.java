@@ -234,7 +234,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
         String amendment = state.submitWaiver1915cAppendixK("Test Amendment", getUtils().getProposedEffectiveDate());
 
         SeaUser sea = createNewSeaUser();
-        sea.createWaiverPackage(
+        sea.createAppendixKWaiver(
                 amendment, getUtils().getInitialSubmissionDate(),
                 getUtils().getProposedEffectiveDate()
         );
