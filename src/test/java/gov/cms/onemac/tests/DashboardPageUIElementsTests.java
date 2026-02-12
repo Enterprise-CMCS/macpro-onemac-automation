@@ -50,6 +50,23 @@ public class DashboardPageUIElementsTests extends BaseTest {
         AssertionUtil.assertTrue(PageFactory.getDashboardPage(getDriver(), getUtils()).columnHidden("Authority"), "Authority should be hidden.");
     }
 
+
+    @Test
+    public void stateUserCanLogin() {
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+        // Add assertion
+    }
+
+    @Test
+    public void cmsUserCanLogin() {
+        CMSUser cmsUser = createNewCMSUser();
+        cmsUser.navigateToOneMac();
+        cmsUser.login();
+        // Add assertion
+    }
+
     @Test
     public void verifyFilters() {
         CMSUser cmsUser = createNewCMSUser();
