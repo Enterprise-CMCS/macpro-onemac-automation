@@ -1,5 +1,4 @@
-name: OneMAC-Automation Test Suite (GitHub Hosted)
-run-name: "OneMAC Test Suite"
+name: OneMAC Automation CI
 
 on:
   push:
@@ -8,6 +7,7 @@ on:
 
 jobs:
   test-github:
+    name: OneMAC Test Suite (GitHub Runner)
     runs-on: ubuntu-latest
     env:
       STATE_USERNAME: ${{ secrets.STATE_USERNAME }}
@@ -37,7 +37,6 @@ jobs:
           FILE=src/test/resources/config.properties
           BROWSER=$(grep -E '^\s*browser\s*=' "$FILE" | cut -d'=' -f2 | tr -d '[:space:]')
           HEADLESS=$(grep -E '^\s*headless\s*=' "$FILE" | cut -d'=' -f2 | tr -d '[:space:]')
-
           echo "BROWSER=$BROWSER" >> $GITHUB_ENV
           echo "HEADLESS=$HEADLESS" >> $GITHUB_ENV
 
@@ -48,7 +47,7 @@ jobs:
             -Dtestng.parameters.browser=$BROWSER \
             -Dtestng.parameters.headless=$HEADLESS \
             -Duser.timezone=America/New_York \
-            -Drun.id=${{ github.run_id }}
+            -Drun.id=github
         shell: bash
         continue-on-error: true
 
@@ -62,9 +61,69 @@ jobs:
             screenshots/**
           if-no-files-found: warn
 
+  test-self-hosted:
+    name: E2E OneMAC & SEATool (Self-Hosted)
+    runs-on: [ self-hosted, Windows, X64, e2e ]
+    env:
+      STATE_USERNAME: ${{ secrets.STATE_USERNAME }}
+      STATE_PASSWORD: ${{ secrets.STATE_PASSWORD }}
+      CMS_USERNAME: ${{ secrets.CMS_USERNAME }}
+      CMS_PASSWORD: ${{ secrets.CMS_PASSWORD }}
+      SEA_USERNAME: ${{ secrets.SEA_USERNAME }}
+      SEA_PASSWORD: ${{ secrets.SEA_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Read browser + headless from config.properties
+        shell: powershell
+        run: |
+          $configPath = "src/test/resources/config.properties"
+          $browser = (Select-String -Path $configPath -Pattern "browser\s*=").ToString().Split("=")[1].Trim()
+          $headless = (Select-String -Path $configPath -Pattern "headless\s*=").ToString().Split("=")[1].Trim()
+          Add-Content -Path $env:GITHUB_ENV -Value "BROWSER=$browser"
+          Add-Content -Path $env:GITHUB_ENV -Value "HEADLESS=$headless"
+
+      - name: Run E2E Suite (Self-Hosted)
+        shell: powershell
+        continue-on-error: true
+        run: |
+          mvn clean test `
+            "-DsuiteXmlFile=src/test/resources/E2E OneMAC & SEATool.xml" `
+            "-Dtestng.parameters.browser=$env:BROWSER" `
+            "-Dtestng.parameters.headless=$env:HEADLESS" `
+            "-Duser.timezone=America/New_York" `
+            "-Drun.id=self-hosted"
+
+      - name: Upload Extent Report JSON (Self-Hosted)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneMAC-Test-Report-SelfHosted
+          path: extent-report/*.json
+          if-no-files-found: warn
+
   merge-reports:
+    name: Merge OneMAC Reports & Send Email
     runs-on: ubuntu-latest
-    needs: [ test-github, test-self-hosted ]  # merge waits for both runners
+    needs: [ test-github, test-self-hosted ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -99,8 +158,6 @@ jobs:
         shell: bash
         run: |
           MERGED_JSON="reports/OneMACTestReport-merged.json"
-
-          # If your final JSON is produced in merge folder
           if [ -f "$MERGED_JSON" ]; then
             PASSED=$(jq '[.[] | select(.status == "PASS")] | length' "$MERGED_JSON")
             FAILED=$(jq '[.[] | select(.status == "FAIL")] | length' "$MERGED_JSON")
@@ -110,7 +167,6 @@ jobs:
             FAILED=0
             SKIPPED=0
           fi
-
           echo "PASSED=$PASSED" >> $GITHUB_ENV
           echo "FAILED=$FAILED" >> $GITHUB_ENV
           echo "SKIPPED=$SKIPPED" >> $GITHUB_ENV
@@ -130,12 +186,10 @@ jobs:
                    style="font-family: Arial, Helvetica, sans-serif; max-width:700px; margin:auto; border-collapse:collapse;">
               <tr>
                 <td style="padding:20px;">
-
                   <h2 style="margin-bottom:5px;">OneMAC SMART Automation Report</h2>
                   <p style="margin-top:0; color:#777;">
                     Run #${{ github.run_number }} | Branch: ${{ github.ref_name }}
                   </p>
-
                   <table width="100%" cellpadding="10" cellspacing="0" style="margin-top:15px; border-collapse:collapse;">
                     <tr>
                       <td align="center" bgcolor="#D5F5E3">
@@ -152,18 +206,15 @@ jobs:
                       </td>
                     </tr>
                   </table>
-
                   <p style="margin-top:25px;">
                     <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                        style="background:#2E86C1; color:#ffffff; padding:12px 20px; text-decoration:none;">
                        View Full Report
                     </a>
                   </p>
-
                   <p style="margin-top:30px; font-size:12px; color:#999;">
                     Generated automatically by GitHub Actions CI.
                   </p>
-
                 </td>
               </tr>
             </table>
