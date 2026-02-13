@@ -54,6 +54,7 @@ jobs:
 
           echo "BROWSER=$BROWSER" >> $GITHUB_ENV
           echo "HEADLESS=$HEADLESS" >> $GITHUB_ENV
+        shell: bash
 
       ###############################################################
       # Run OneMAC Suite
@@ -69,11 +70,13 @@ jobs:
         continue-on-error: true
 
       ###############################################################
-      # Prepare artifacts (extent-report + screenshots)
+      # Prepare artifact folder safely
       ###############################################################
-      - name: Collect Artifacts
+      - name: Prepare Artifact Folder
+        if: always()
         run: |
           mkdir -p temp_artifact
+
           if [ -d "extent-report" ]; then
             cp -r extent-report/* temp_artifact/
             echo "Copied extent-report"
@@ -90,48 +93,12 @@ jobs:
         shell: bash
 
       ###############################################################
-      # Upload raw artifacts
+      # Upload raw artifacts (for consolidation workflow)
       ###############################################################
-      - name: Upload Extent Report & Screenshots
+      - name: Upload OneMAC Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: OneMAC-Test-Report
           path: temp_artifact
           if-no-files-found: warn
-
-      ###############################################################
-      # Run ExtentReportFinalizer to merge JSON + generate HTML
-      ###############################################################
-      - name: Generate Consolidated Extent Report
-        run: |
-          mvn exec:java \
-            -Dexec.mainClass="gov.cms.onemac.utils.ExtentReportFinalizer" \
-            -Dexec.args="extent-report"
-        shell: bash
-
-      ###############################################################
-      # Upload the merged HTML report
-      ###############################################################
-      - name: Upload Consolidated HTML Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: OneMAC-Final-Report
-          path: extent-report/FinalExecutiveReport.html
-          if-no-files-found: warn
-
-      ###############################################################
-      # Optional: Send email with report (add your SMTP / secrets)
-      ###############################################################
-      # - name: Send Email with Report
-      #   uses: dawidd6/action-send-mail@v3
-      #   with:
-      #     server_address: smtp.example.com
-      #     server_port: 587
-      #     username: ${{ secrets.EMAIL_USER }}
-      #     password: ${{ secrets.EMAIL_PASS }}
-      #     subject: "OneMAC Test Suite Results"
-      #     body: "Final report is attached"
-      #     to: "team@example.com"
-      #     attachments: extent-report/FinalExecutiveReport.html
