@@ -81,15 +81,33 @@ jobs:
       # ----------------------------
       # Prepare Extent Report + Screenshots for upload
       # ----------------------------
-      # ← Add this step immediately after test run
       - name: Collect Artifacts
         shell: powershell
         run: |
           $artifactDir = "C:\temp\artifact"
+          
+          # Remove old folder if exists
           Remove-Item -Recurse -Force $artifactDir -ErrorAction Ignore
+          
+          # Create artifact folder
           New-Item -ItemType Directory -Path $artifactDir | Out-Null
-          if (Test-Path "extent-report") { Copy-Item -Path "extent-report\*" -Destination $artifactDir\ -Recurse }
-          if (Test-Path "screenshots") { Copy-Item -Path "screenshots\*" -Destination $artifactDir\ -Recurse }
+          
+          # Copy extent-report
+          if (Test-Path "extent-report") {
+              Copy-Item -Path "extent-report\*" -Destination $artifactDir\ -Recurse
+              Write-Output "Copied extent-report"
+          } else {
+              Write-Output "extent-report missing"
+          }
+          
+          # Copy screenshots
+          if (Test-Path "screenshots") {
+              Copy-Item -Path "screenshots\*" -Destination $artifactDir\ -Recurse
+              Write-Output "Copied screenshots"
+          } else {
+              Write-Output "screenshots missing"
+          }
+      
 
       # ----------------------------
       # Upload Artifacts
