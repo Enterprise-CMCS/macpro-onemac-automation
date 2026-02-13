@@ -121,14 +121,27 @@ jobs:
             "-Dtestng.parameters.headless=$env:HEADLESS" `
             "-Duser.timezone=America/New_York"
 
-      # ← Add this step immediately after test run
       - name: Collect Artifacts
         shell: bash
         run: |
+          echo "Current dir: $(pwd)"
+          echo "Listing files:"
+          ls -R
           ARTIFACT_DIR="temp_artifact"
           mkdir -p "$ARTIFACT_DIR"
-          [ -d "extent-report" ] && cp -r extent-report/* "$ARTIFACT_DIR/" || echo "extent-report missing"
-          [ -d "screenshots" ] && cp -r screenshots/* "$ARTIFACT_DIR/" || echo "screenshots missing"
+          if [ -d "extent-report" ]; then
+            cp -r extent-report/* "$ARTIFACT_DIR/"
+            echo "Copied extent-report"
+          else
+            echo "extent-report missing"
+          fi
+          
+          if [ -d "screenshots" ]; then
+            cp -r screenshots/* "$ARTIFACT_DIR/"
+            echo "Copied screenshots"
+          else
+            echo "screenshots missing"
+          fi
 
       - name: Upload Self-hosted Extent Report & Screenshots
         if: always()
