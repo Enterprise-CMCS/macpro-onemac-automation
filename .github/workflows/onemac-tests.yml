@@ -121,19 +121,14 @@ jobs:
             "-Dtestng.parameters.headless=$env:HEADLESS" `
             "-Duser.timezone=America/New_York"
 
-      - name: Prepare artifacts for upload
-        shell: powershell
+      # ← Add this step immediately after test run
+      - name: Collect Artifacts
+        shell: bash
         run: |
-          $tempDir = "C:\temp\artifact"
-          Remove-Item -Recurse -Force $tempDir -ErrorAction Ignore
-          New-Item -ItemType Directory -Path $tempDir
-
-          if (Test-Path "extent-report") {
-              Copy-Item -Path extent-report\* -Destination $tempDir\ -Recurse
-          }
-          if (Test-Path "screenshots") {
-              Copy-Item -Path screenshots\* -Destination $tempDir\ -Recurse
-          }
+          ARTIFACT_DIR="temp_artifact"
+          mkdir -p "$ARTIFACT_DIR"
+          [ -d "extent-report" ] && cp -r extent-report/* "$ARTIFACT_DIR/" || echo "extent-report missing"
+          [ -d "screenshots" ] && cp -r screenshots/* "$ARTIFACT_DIR/" || echo "screenshots missing"
 
       - name: Upload Self-hosted Extent Report & Screenshots
         if: always()
@@ -177,6 +172,7 @@ jobs:
             -Dexec.mainClass="gov.cms.onemac.utils.ExtentReportFinalizer" \
             -Dexec.args="reports"
         shell: bash
+
 
       - name: Extract Test Summary
         if: always()

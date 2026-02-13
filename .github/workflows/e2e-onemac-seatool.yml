@@ -81,23 +81,15 @@ jobs:
       # ----------------------------
       # Prepare Extent Report + Screenshots for upload
       # ----------------------------
-      - name: Prepare Artifacts
-        if: always()
+      # ← Add this step immediately after test run
+      - name: Collect Artifacts
         shell: powershell
         run: |
-          $tempDir = "C:\temp\artifact"
-          Remove-Item -Recurse -Force $tempDir -ErrorAction Ignore
-          New-Item -ItemType Directory -Path $tempDir
-
-          # Copy JSON reports
-          if (Test-Path "extent-report") {
-              Copy-Item -Path extent-report\*.json -Destination $tempDir\ -ErrorAction SilentlyContinue
-          }
-
-          # Copy screenshots (if any)
-          if (Test-Path "screenshots") {
-              Copy-Item -Path screenshots\* -Destination $tempDir\ -Recurse -ErrorAction SilentlyContinue
-          }
+          $artifactDir = "C:\temp\artifact"
+          Remove-Item -Recurse -Force $artifactDir -ErrorAction Ignore
+          New-Item -ItemType Directory -Path $artifactDir | Out-Null
+          if (Test-Path "extent-report") { Copy-Item -Path "extent-report\*" -Destination $artifactDir\ -Recurse }
+          if (Test-Path "screenshots") { Copy-Item -Path "screenshots\*" -Destination $artifactDir\ -Recurse }
 
       # ----------------------------
       # Upload Artifacts
