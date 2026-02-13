@@ -121,24 +121,23 @@ jobs:
             "-Dtestng.parameters.headless=$env:HEADLESS" `
             "-Duser.timezone=America/New_York"
 
-      - name: Prepare Artifacts
+      - name: Prepare artifacts for upload
         shell: bash
         run: |
-          ARTIFACT_DIR="temp_artifact"
-          mkdir -p "$ARTIFACT_DIR"
+          mkdir -p temp_artifact
 
           if [ -d "extent-report" ]; then
-            cp -r extent-report/* "$ARTIFACT_DIR/"
+            cp -r extent-report/* temp_artifact/
             echo "Copied extent-report"
           else
-            echo "extent-report missing, skipping"
+            echo "extent-report folder missing, skipping copy"
           fi
 
           if [ -d "screenshots" ]; then
-            cp -r screenshots/* "$ARTIFACT_DIR/"
+            cp -r screenshots/* temp_artifact/
             echo "Copied screenshots"
           else
-            echo "screenshots missing, skipping"
+            echo "screenshots folder missing, skipping copy"
           fi
 
       - name: Upload Self-hosted Extent Report & Screenshots
