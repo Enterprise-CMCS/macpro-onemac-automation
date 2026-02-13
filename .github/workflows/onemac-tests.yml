@@ -146,11 +146,12 @@ jobs:
           name: OneMAC-Test-Report-SelfHosted
           path: reports/self
 
-      - name: Merge Extent Reports
+      - name: Merge Extent Reports (Debug)
         run: |
           mvn exec:java \
             -Dexec.mainClass="gov.cms.onemac.utils.ExtentReportFinalizer" \
-            -Dexec.args="reports"
+            -Dexec.args="reports/all" \
+            -X
         shell: bash
 
       - name: Extract Test Summary
