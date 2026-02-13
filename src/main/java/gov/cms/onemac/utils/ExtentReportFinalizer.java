@@ -2,59 +2,101 @@ package gov.cms.onemac.utils;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
-import com.aventstack.extentreports.reporter.JsonFormatter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExtentReportFinalizer {
 
     public static void main(String[] args) {
+        if (args.length < 1) {
+            System.err.println("Usage: java ExtentReportFinalizer <parent-reports-folder>");
+            System.exit(1);
+        }
+
+        String parentFolder = args[0];
+        String mergedJsonPath = parentFolder + File.separator + "OneMACTestReport-merged.json";
+        String finalHtmlPath = parentFolder + File.separator + "FinalExecutiveReport.html";
+
         try {
-            String reportFolder;
-            if (args.length > 0) {
-                reportFolder = args[0]; // passed as argument
-            } else {
-                reportFolder = System.getProperty("user.dir") + File.separator + "extent-report";
+            System.out.println("Starting report consolidation...");
+
+            // 1. Scan parent folder recursively and collect all JSON files
+            List<File> jsonFiles = findAllJsonFiles(new File(parentFolder));
+
+            if (jsonFiles.isEmpty()) {
+                System.err.println("No JSON report files found under " + parentFolder);
+                System.exit(2);
             }
 
-            File folder = new File(reportFolder);
-            if (!folder.exists() || !folder.isDirectory()) {
-                throw new RuntimeException("Report folder not found: " + reportFolder);
-            }
+            // 2. Merge all JSON files
+            mergeJsonFiles(jsonFiles, mergedJsonPath);
 
-
-            String finalHtmlPath = reportFolder + File.separator + "FinalExecutiveReport.html";
-
-            System.out.println("Scanning folder for JSON reports: " + folder.getAbsolutePath());
-
-            ExtentReports extent = new ExtentReports();
-
-            ExtentSparkReporter spark = new ExtentSparkReporter(finalHtmlPath);
-            spark.config().setReportName("Consolidated OneMAC Test Report");
-            spark.config().setDocumentTitle("OneMAC Test Results");
-
-            extent.attachReporter(spark);
-
-
-            File[] jsonFiles = folder.listFiles((dir, name) -> name.endsWith(".json"));
-            if (jsonFiles == null || jsonFiles.length == 0) {
-                throw new RuntimeException("No JSON files found in folder: " + folder.getAbsolutePath());
-            }
-
-            for (File json : jsonFiles) {
-                System.out.println("Merging JSON file: " + json.getName());
-                extent.createDomainFromJsonArchive(json);
-            }
-
-            extent.flush();
+            // 3. Generate HTML report from merged JSON
+            generateHtmlFromJson(mergedJsonPath, finalHtmlPath);
 
             System.out.println("=== REPORTING COMPLETE ===");
             System.out.println("Final Dashboard: " + finalHtmlPath);
 
         } catch (Exception e) {
-            System.err.println("Failed to finalize reports:");
+            System.err.println("Failed to finalize reports: " + e.getMessage());
             e.printStackTrace();
-            System.exit(1);
+            System.exit(3);
+        }
+    }
+
+    /** Recursively finds all .json files in a folder */
+    private static List<File> findAllJsonFiles(File folder) {
+        List<File> jsonFiles = new ArrayList<>();
+        if (!folder.exists() || !folder.isDirectory()) return jsonFiles;
+
+        File[] files = folder.listFiles();
+        if (files == null) return jsonFiles;
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                jsonFiles.addAll(findAllJsonFiles(file));
+            } else if (file.getName().endsWith(".json")) {
+                jsonFiles.add(file);
+            }
+        }
+        return jsonFiles;
+    }
+
+    /** Merge multiple JSON files into a single ArrayNode and write to output */
+    private static void mergeJsonFiles(List<File> jsonFiles, String outputPath) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode masterArray = mapper.createArrayNode();
+
+        for (File file : jsonFiles) {
+            System.out.println("Merging: " + file.getAbsolutePath());
+            ArrayNode individualArray = (ArrayNode) mapper.readTree(file);
+            masterArray.addAll(individualArray);
+        }
+
+        mapper.writerWithDefaultPrettyPrinter().writeValue(new File(outputPath), masterArray);
+    }
+
+    /** Generate HTML report from merged JSON using ExtentSparkReporter */
+    private static void generateHtmlFromJson(String jsonInput, String htmlOutput) throws IOException {
+        ExtentReports extent = new ExtentReports();
+        ExtentSparkReporter spark = new ExtentSparkReporter(htmlOutput);
+
+        spark.config().setReportName("Consolidated OneMAC Test Report");
+        spark.config().setDocumentTitle("OneMAC Final Results");
+
+        extent.attachReporter(spark);
+
+        File sourceJson = new File(jsonInput);
+        if (sourceJson.exists()) {
+            extent.createDomainFromJsonArchive(sourceJson);
+            extent.flush();
+        } else {
+            throw new IOException("Merged JSON source not found at: " + jsonInput);
         }
     }
 }

@@ -26,12 +26,18 @@ jobs:
       SEA_PASSWORD: ${{ secrets.SEA_PASSWORD }}
 
     steps:
+      # ----------------------------
+      # Checkout
+      # ----------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: main
 
+      # ----------------------------
+      # Set up Java & Maven cache
+      # ----------------------------
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -46,16 +52,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      # ----------------------------
+      # Read browser + headless
+      # ----------------------------
       - name: Read browser + headless from config.properties
         shell: powershell
         run: |
           $configPath = "src/test/resources/config.properties"
           $browser = (Select-String -Path $configPath -Pattern "browser\s*=").ToString().Split("=")[1].Trim()
           $headless = (Select-String -Path $configPath -Pattern "headless\s*=").ToString().Split("=")[1].Trim()
-
           Add-Content -Path $env:GITHUB_ENV -Value "BROWSER=$browser"
           Add-Content -Path $env:GITHUB_ENV -Value "HEADLESS=$headless"
 
+      # ----------------------------
+      # Run E2E Suite
+      # ----------------------------
       - name: Run E2E Suite (OneMAC + SEATool)
         shell: powershell
         continue-on-error: true
@@ -67,10 +78,34 @@ jobs:
             "-Duser.timezone=America/New_York" `
             "-Drun.id=self-hosted"
 
-      - name: Upload Extent Report JSON (Self-Hosted)
+      # ----------------------------
+      # Prepare Extent Report + Screenshots for upload
+      # ----------------------------
+      - name: Prepare Artifacts
+        if: always()
+        shell: powershell
+        run: |
+          $tempDir = "C:\temp\artifact"
+          Remove-Item -Recurse -Force $tempDir -ErrorAction Ignore
+          New-Item -ItemType Directory -Path $tempDir
+
+          # Copy JSON reports
+          if (Test-Path "extent-report") {
+              Copy-Item -Path extent-report\*.json -Destination $tempDir\ -ErrorAction SilentlyContinue
+          }
+
+          # Copy screenshots (if any)
+          if (Test-Path "screenshots") {
+              Copy-Item -Path screenshots\* -Destination $tempDir\ -Recurse -ErrorAction SilentlyContinue
+          }
+
+      # ----------------------------
+      # Upload Artifacts
+      # ----------------------------
+      - name: Upload Extent Report + Screenshots (Self-Hosted)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: OneMAC-Test-Report-SelfHosted
-          path: extent-report/*.json
+          path: C:\temp\artifact
           if-no-files-found: warn
