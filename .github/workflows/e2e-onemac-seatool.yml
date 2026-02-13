@@ -6,7 +6,6 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-# Prevent two workflows from modifying Excel at the same time
 concurrency:
   group: excel-sync
   cancel-in-progress: false
@@ -27,9 +26,6 @@ jobs:
       SEA_PASSWORD: ${{ secrets.SEA_PASSWORD }}
 
     steps:
-      ###############################################################
-      # Always check out latest main so Excel is not stale
-      ###############################################################
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -50,9 +46,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      ###############################################################
-      # Read browser/headless settings from config
-      ###############################################################
       - name: Read browser + headless from config.properties
         shell: powershell
         run: |
@@ -63,9 +56,6 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "BROWSER=$browser"
           Add-Content -Path $env:GITHUB_ENV -Value "HEADLESS=$headless"
 
-      ###############################################################
-      # Run E2E Suite
-      ###############################################################
       - name: Run E2E Suite (OneMAC + SEATool)
         shell: powershell
         continue-on-error: true
@@ -74,88 +64,13 @@ jobs:
             "-DsuiteXmlFile=src/test/resources/E2E OneMAC & SEATool.xml" `
             "-Dtestng.parameters.browser=$env:BROWSER" `
             "-Dtestng.parameters.headless=$env:HEADLESS" `
-            "-Duser.timezone=America/New_York"
+            "-Duser.timezone=America/New_York" `
+            "-Drun.id=self-hosted"
 
-      ###############################################################
-      # Upload report
-      ###############################################################
-      - name: Upload Extent Report & Screenshots
+      - name: Upload Extent Report JSON (Self-Hosted)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: E2E-OneMAC-SEATool-Report
-          path: |
-            extent-report/**
-            screenshots/**
+          name: OneMAC-Test-Report-SelfHosted
+          path: extent-report/*.json
           if-no-files-found: warn
-
-      ###############################################################
-      # Configure Git identity
-      ###############################################################
-      - name: Configure Git Identity
-        if: always()
-        shell: powershell
-        run: |
-          git config user.name "Amjad"
-          git config user.email "jad.ammar.co@gmail.com"
-          Write-Output "Git identity configured."
-
-      ###############################################################
-      # Stage updated Excel files
-      ###############################################################
-      - name: Stage updated Excel files
-        if: always()
-        shell: powershell
-        run: |
-          $updated = 0
-
-          if (Test-Path "src/test/resources/state_counters.xlsx") {
-            git add "src/test/resources/state_counters.xlsx"
-            Write-Output "Staged state_counters.xlsx"
-            $updated = 1
-          }
-
-          if (Test-Path "src/test/resources/packages.xlsx") {
-            git add "src/test/resources/packages.xlsx"
-            Write-Output "Staged packages.xlsx"
-            $updated = 1
-          }
-
-          Add-Content -Path $env:GITHUB_ENV -Value "UPDATED=$updated"
-          Write-Output "UPDATED=$updated"
-
-      ###############################################################
-      # Commit + Push Excel Updates with rebase
-      ###############################################################
-      - name: Commit & Push Excel Updates
-        if: always()
-        shell: powershell
-        run: |
-          Write-Output "=== Commit Stage Starting ==="
-          Write-Output "UPDATED=$env:UPDATED"
-
-          if ($env:UPDATED -eq "1") {
-
-            if (-not (git diff --cached --quiet)) {
-
-              Write-Output "Committing Excel updates..."
-              git commit -m 'CI: Update Excel counters (state_counters + packages)'
-
-              Write-Output "Fetching latest main..."
-              git fetch origin main
-
-              Write-Output "Rebasing onto latest main..."
-              git pull origin main --rebase
-
-              Write-Output "Pushing Excel updates..."
-              git push origin HEAD:main
-
-              Write-Output "Excel update push completed successfully."
-            }
-            else {
-              Write-Output "No staged Excel changes - skipping commit."
-            }
-          }
-          else {
-            Write-Output "No Excel updates detected - nothing to push."
-          }

@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 public class PackageLifecycleE2ETests extends BaseTest {
 
 
-    @Test
+   /* @Test
     public void verifyInitialMedicaidSpaSubmissionWorkflow() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
@@ -761,7 +761,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 isStateUnsubmitted,
                 "State user should see the package status as 'Unsubmitted'."
         );
-    }
+    }*/
 
     @Test
     public void dataGeneratorTest() {

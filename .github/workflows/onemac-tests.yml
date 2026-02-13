@@ -7,15 +7,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  test-github:
     runs-on: ubuntu-latest
-
     env:
       STATE_USERNAME: ${{ secrets.STATE_USERNAME }}
       STATE_PASSWORD: ${{ secrets.STATE_PASSWORD }}
       CMS_USERNAME: ${{ secrets.CMS_USERNAME }}
       CMS_PASSWORD: ${{ secrets.CMS_PASSWORD }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,13 +41,14 @@ jobs:
           echo "BROWSER=$BROWSER" >> $GITHUB_ENV
           echo "HEADLESS=$HEADLESS" >> $GITHUB_ENV
 
-      - name: Run OneMAC Suite
+      - name: Run OneMAC Suite (GitHub Runner)
         run: |
           mvn clean test \
             -DsuiteXmlFile=src/test/resources/OneMAC.xml \
             -Dtestng.parameters.browser=$BROWSER \
             -Dtestng.parameters.headless=$HEADLESS \
-            -Duser.timezone=America/New_York
+            -Duser.timezone=America/New_York \
+            -Drun.id=${{ github.run_id }}
         shell: bash
         continue-on-error: true
 
@@ -57,8 +56,116 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: OneMAC-Test-Report
+          name: OneMAC-Test-Report-GH
           path: |
             extent-report/**
             screenshots/**
           if-no-files-found: warn
+
+  merge-reports:
+    runs-on: ubuntu-latest
+    needs: [ test-github, test-self-hosted ]  # merge waits for both runners
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Download GitHub-hosted JSON
+        uses: actions/download-artifact@v4
+        with:
+          name: OneMAC-Test-Report-GH
+          path: reports/gh
+
+      - name: Download Self-hosted JSON
+        uses: actions/download-artifact@v4
+        with:
+          name: OneMAC-Test-Report-SelfHosted
+          path: reports/self
+
+      - name: Merge Extent Reports
+        run: |
+          mvn exec:java \
+            -Dexec.mainClass="gov.cms.onemac.base.ExtentReportFinalizer" \
+            -Dexec.args="reports"
+        shell: bash
+
+      - name: Extract Test Summary
+        if: always()
+        shell: bash
+        run: |
+          MERGED_JSON="reports/OneMACTestReport-merged.json"
+
+          # If your final JSON is produced in merge folder
+          if [ -f "$MERGED_JSON" ]; then
+            PASSED=$(jq '[.[] | select(.status == "PASS")] | length' "$MERGED_JSON")
+            FAILED=$(jq '[.[] | select(.status == "FAIL")] | length' "$MERGED_JSON")
+            SKIPPED=$(jq '[.[] | select(.status == "SKIP")] | length' "$MERGED_JSON")
+          else
+            PASSED=0
+            FAILED=0
+            SKIPPED=0
+          fi
+
+          echo "PASSED=$PASSED" >> $GITHUB_ENV
+          echo "FAILED=$FAILED" >> $GITHUB_ENV
+          echo "SKIPPED=$SKIPPED" >> $GITHUB_ENV
+
+      - name: Send Extent Report Email
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL }}
+          password: ${{ secrets.APP_PASSWORD }}
+          subject: "OneMAC SMART Automation Report"
+          html_body: |
+            <table width="100%" cellpadding="0" cellspacing="0" 
+                   style="font-family: Arial, Helvetica, sans-serif; max-width:700px; margin:auto; border-collapse:collapse;">
+              <tr>
+                <td style="padding:20px;">
+
+                  <h2 style="margin-bottom:5px;">OneMAC SMART Automation Report</h2>
+                  <p style="margin-top:0; color:#777;">
+                    Run #${{ github.run_number }} | Branch: ${{ github.ref_name }}
+                  </p>
+
+                  <table width="100%" cellpadding="10" cellspacing="0" style="margin-top:15px; border-collapse:collapse;">
+                    <tr>
+                      <td align="center" bgcolor="#D5F5E3">
+                        <h2 style="margin:0;">${{ env.PASSED }}</h2>
+                        <p style="margin:0;">Passed</p>
+                      </td>
+                      <td align="center" bgcolor="#FADBD8">
+                        <h2 style="margin:0;">${{ env.FAILED }}</h2>
+                        <p style="margin:0;">Failed</p>
+                      </td>
+                      <td align="center" bgcolor="#FCF3CF">
+                        <h2 style="margin:0;">${{ env.SKIPPED }}</h2>
+                        <p style="margin:0;">Skipped</p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p style="margin-top:25px;">
+                    <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                       style="background:#2E86C1; color:#ffffff; padding:12px 20px; text-decoration:none;">
+                       View Full Report
+                    </a>
+                  </p>
+
+                  <p style="margin-top:30px; font-size:12px; color:#999;">
+                    Generated automatically by GitHub Actions CI.
+                  </p>
+
+                </td>
+              </tr>
+            </table>
+          to: amjad.ammar@icf.com
+          from: OneMAC CI
