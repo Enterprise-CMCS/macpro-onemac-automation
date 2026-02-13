@@ -3,6 +3,7 @@
     <test name="OneMac UI Tests">
         <classes>
             <class name="gov.cms.onemac.tests.DashboardPageUIElementsTests"/>
+            <class name="gov.cms.onemac.tests.PackageLifecycleE2ETests"/>
         </classes>
     </test>
     <listeners>

@@ -71,7 +71,7 @@ jobs:
         continue-on-error: true
         run: |
           mvn clean test `
-            "-DsuiteXmlFile=src/test/resources/E2E OneMAC & SEATool.xml" `
+            "-DsuiteXmlFile=src/test/resources/OneMAC.xml" `
             "-Dtestng.parameters.browser=$env:BROWSER" `
             "-Dtestng.parameters.headless=$env:HEADLESS" `
             "-Duser.timezone=America/New_York"
