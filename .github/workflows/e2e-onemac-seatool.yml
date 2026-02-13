@@ -1,5 +1,5 @@
-name: E2E - OneMAC & SEATool (Self-Hosted with Zscaler)
-run-name: "E2E - OneMAC & SEATool Test Suite"
+name: OneMAC
+run-name: "OneMAC Test Suite"
 
 on:
   push:
@@ -207,7 +207,7 @@ jobs:
                    style="font-family: Arial, Helvetica, sans-serif; max-width:700px; margin:auto; border-collapse:collapse;">
               <tr>
                 <td style="padding:20px;">
-                  <h2 style="margin-bottom:5px;">OneMAC SMART Automation Report</h2>
+                  <h2 style="margin-bottom:5px;">OneMAC Automation Report</h2>
                   <p style="margin-top:0; color:#777;">
                     Run #${{ github.run_number }} | Branch: ${{ github.ref_name }}
                   </p>
