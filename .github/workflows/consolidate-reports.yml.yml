@@ -1,0 +1,66 @@
+name: Consolidate & Merge Extent Reports
+
+on:
+  workflow_run:
+    workflows:
+      - E2E - OneMAC & SEATool (Self-Hosted with Zscaler)
+      - OneMAC-Automation Test Suite (GitHub Hosted)
+    types:
+      - completed
+
+jobs:
+  consolidate:
+    if: github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-latest
+
+    steps:
+      ###############################################################
+      # Checkout code
+      ###############################################################
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      ###############################################################
+      # Setup Java
+      ###############################################################
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      ###############################################################
+      # Build project to get dependencies
+      ###############################################################
+      - name: Build project (skip tests)
+        run: mvn clean package -DskipTests
+
+      ###############################################################
+      # Download artifacts from BOTH workflows
+      ###############################################################
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: merged-input
+
+      ###############################################################
+      # Merge all JSON files into one folder
+      ###############################################################
+      - name: Merge Reports
+        run: |
+          mkdir -p extent-report
+          find merged-input -name "*.json" -exec cp {} extent-report/ \;
+
+          echo "Running ExtentReportFinalizer..."
+          java -cp target/classes:target/dependency/* \
+            gov.cms.onemac.utils.ExtentReportFinalizer \
+            extent-report
+
+      ###############################################################
+      # Upload final merged report
+      ###############################################################
+      - name: Upload Final Consolidated Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Final-Consolidated-Extent-Report
+          path: extent-report
