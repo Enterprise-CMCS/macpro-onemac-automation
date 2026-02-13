@@ -1,13 +1,16 @@
-name: OneMAC Automation CI
+name: OneMAC-Automation Test Suite (Combined)
 run-name: "OneMAC Test Suite"
+
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
+  # ---------------------------
+  # GitHub-hosted runner
+  # ---------------------------
   test-github:
-    name: OneMAC Test Suite (GitHub Runner)
     runs-on: ubuntu-latest
     env:
       STATE_USERNAME: ${{ secrets.STATE_USERNAME }}
@@ -47,7 +50,7 @@ jobs:
             -Dtestng.parameters.browser=$BROWSER \
             -Dtestng.parameters.headless=$HEADLESS \
             -Duser.timezone=America/New_York \
-            -Drun.id=github
+            -Drun.id=${{ github.run_id }}
         shell: bash
         continue-on-error: true
 
@@ -61,8 +64,10 @@ jobs:
             screenshots/**
           if-no-files-found: warn
 
+  # ---------------------------
+  # Self-hosted runner
+  # ---------------------------
   test-self-hosted:
-    name: E2E OneMAC & SEATool (Self-Hosted)
     runs-on: [ self-hosted, Windows, X64, e2e ]
     env:
       STATE_USERNAME: ${{ secrets.STATE_USERNAME }}
@@ -101,7 +106,7 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "BROWSER=$browser"
           Add-Content -Path $env:GITHUB_ENV -Value "HEADLESS=$headless"
 
-      - name: Run E2E Suite (Self-Hosted)
+      - name: Run E2E Suite (Self-hosted)
         shell: powershell
         continue-on-error: true
         run: |
@@ -109,19 +114,27 @@ jobs:
             "-DsuiteXmlFile=src/test/resources/E2E OneMAC & SEATool.xml" `
             "-Dtestng.parameters.browser=$env:BROWSER" `
             "-Dtestng.parameters.headless=$env:HEADLESS" `
-            "-Duser.timezone=America/New_York" `
-            "-Drun.id=self-hosted"
+            "-Duser.timezone=America/New_York"
 
-      - name: Upload Extent Report JSON (Self-Hosted)
+      - name: Copy artifacts to temp folder (avoid spaces)
+        shell: powershell
+        run: |
+          Remove-Item -Recurse -Force C:\temp\artifact -ErrorAction Ignore
+          New-Item -ItemType Directory -Path C:\temp\artifact
+          Copy-Item -Path extent-report\* -Destination C:\temp\artifact\ -Recurse
+          Copy-Item -Path screenshots\* -Destination C:\temp\artifact\ -Recurse
+
+      - name: Upload Extent Report & Screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: OneMAC-Test-Report-SelfHosted
-          path: extent-report/*.json
-          if-no-files-found: warn
+          path: C:\temp\artifact
 
+  # ---------------------------
+  # Merge reports and send email
+  # ---------------------------
   merge-reports:
-    name: Merge OneMAC Reports & Send Email
     runs-on: ubuntu-latest
     needs: [ test-github, test-self-hosted ]
     steps:
@@ -146,19 +159,23 @@ jobs:
           name: OneMAC-Test-Report-SelfHosted
           path: reports/self
 
-      - name: Merge Extent Reports (Debug)
+      - name: Compile Java classes
+        run: mvn compile
+
+      - name: Merge Extent Reports
         run: |
+          mkdir -p reports/all
+          cp -r reports/gh/* reports/all/
+          cp -r reports/self/* reports/all/
           mvn exec:java \
             -Dexec.mainClass="gov.cms.onemac.utils.ExtentReportFinalizer" \
-            -Dexec.args="reports/all" \
-            -X
-        shell: bash
+            -Dexec.args="reports/all"
 
       - name: Extract Test Summary
         if: always()
         shell: bash
         run: |
-          MERGED_JSON="reports/OneMACTestReport-merged.json"
+          MERGED_JSON="reports/all/OneMACTestReport-MasterMergedData.json"
           if [ -f "$MERGED_JSON" ]; then
             PASSED=$(jq '[.[] | select(.status == "PASS")] | length' "$MERGED_JSON")
             FAILED=$(jq '[.[] | select(.status == "FAIL")] | length' "$MERGED_JSON")
@@ -181,7 +198,7 @@ jobs:
           secure: true
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.APP_PASSWORD }}
-          subject: "OneMAC Automation Report"
+          subject: "OneMAC SMART Automation Report"
           html_body: |
             <table width="100%" cellpadding="0" cellspacing="0" 
                    style="font-family: Arial, Helvetica, sans-serif; max-width:700px; margin:auto; border-collapse:collapse;">
