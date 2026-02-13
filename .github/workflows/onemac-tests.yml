@@ -105,10 +105,9 @@ jobs:
       ###############################################################
       - name: Generate Consolidated Extent Report
         run: |
-          echo "Running ExtentReportFinalizer..."
-          # Run the class using compiled classes + dependencies
-          java -cp target/classes:target/dependency/* gov.cms.onemac.utils.ExtentReportFinalizer "extent-report"
-          echo "Merged report generated in extent-report folder"
+          mvn exec:java \
+            -Dexec.mainClass="gov.cms.onemac.utils.ExtentReportFinalizer" \
+            -Dexec.args="extent-report"
         shell: bash
 
       ###############################################################
