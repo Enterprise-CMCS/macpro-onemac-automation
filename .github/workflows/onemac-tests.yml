@@ -17,24 +17,15 @@ jobs:
       CMS_PASSWORD: ${{ secrets.CMS_PASSWORD }}
 
     steps:
-      ###############################################################
-      # Checkout repository
-      ###############################################################
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      ###############################################################
-      # Set up JDK 17
-      ###############################################################
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      ###############################################################
-      # Cache Maven dependencies
-      ###############################################################
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
@@ -43,10 +34,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      ###############################################################
-      # Read config.properties (Browser + Headless)
-      ###############################################################
-      - name: Read config.properties
+      - name: Read config.properties (Browser + Headless)
         run: |
           FILE=src/test/resources/config.properties
           BROWSER=$(grep -E '^\s*browser\s*=' "$FILE" | cut -d'=' -f2 | tr -d '[:space:]')
@@ -54,11 +42,7 @@ jobs:
 
           echo "BROWSER=$BROWSER" >> $GITHUB_ENV
           echo "HEADLESS=$HEADLESS" >> $GITHUB_ENV
-        shell: bash
 
-      ###############################################################
-      # Run OneMAC Suite
-      ###############################################################
       - name: Run OneMAC Suite
         run: |
           mvn clean test \
@@ -69,36 +53,12 @@ jobs:
         shell: bash
         continue-on-error: true
 
-      ###############################################################
-      # Prepare artifact folder safely
-      ###############################################################
-      - name: Prepare Artifact Folder
-        if: always()
-        run: |
-          mkdir -p temp_artifact
-
-          if [ -d "extent-report" ]; then
-            cp -r extent-report/* temp_artifact/
-            echo "Copied extent-report"
-          else
-            echo "extent-report missing"
-          fi
-
-          if [ -d "screenshots" ]; then
-            cp -r screenshots/* temp_artifact/
-            echo "Copied screenshots"
-          else
-            echo "screenshots missing"
-          fi
-        shell: bash
-
-      ###############################################################
-      # Upload raw artifacts (for consolidation workflow)
-      ###############################################################
-      - name: Upload OneMAC Artifacts
+      - name: Upload Extent Report & Screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: OneMAC-Test-Report
-          path: temp_artifact
+          path: |
+            extent-report/**
+            screenshots/**
           if-no-files-found: warn
