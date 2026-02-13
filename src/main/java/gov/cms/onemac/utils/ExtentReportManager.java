@@ -10,50 +10,18 @@ public class ExtentReportManager {
 
     private static ExtentReports extent;
 
-    public static synchronized ExtentReports getInstance() {
-
+    public static ExtentReports getInstance() {
         if (extent == null) {
-
             extent = new ExtentReports();
-
-            // Base report directory (portable across OS)
-            String baseDir = System.getProperty("user.dir")
-                    + File.separator + "extent-report";
-
-            new File(baseDir).mkdirs();
-
-            // Determine unique run identifier
-            String runId = System.getProperty("run.id");
-
-            if (runId == null || runId.isEmpty()) {
-                runId = System.getenv("GITHUB_RUN_ID");
-            }
-
-            if (runId == null || runId.isEmpty()) {
-                runId = "local-" + System.currentTimeMillis();
-            }
-
-            // Build dynamic file names
-            String htmlPath = baseDir + File.separator +
-                    "OneMAC-TestReport-" + runId + ".html";
-
-            String jsonPath = baseDir + File.separator +
-                    "OneMACTestReport-" + runId + ".json";
-
-            // Spark Reporter (HTML)
-            ExtentSparkReporter spark = new ExtentSparkReporter(htmlPath);
-            spark.config().setReportName("OneMAC SMART Automated Test Report");
+            // 1. Setup HTML Report (Spark)
+            ExtentSparkReporter spark = new ExtentSparkReporter("extent-report/OneMAC-TestReport.html");
+            spark.config().setReportName("OneMAC Automated Test Report");
             spark.config().setDocumentTitle("Test Results");
-
-            // JSON Reporter (Required for merging)
-            JsonFormatter json = new JsonFormatter(jsonPath);
-
+            // 2. Setup JSON Report
+            JsonFormatter json = new JsonFormatter("extent-report/OneMAC-TestReport.json");
+            // 3. Attach both reporters
             extent.attachReporter(spark, json);
-
-            System.out.println("Extent HTML Report: " + htmlPath);
-            System.out.println("Extent JSON Report: " + jsonPath);
         }
-
         return extent;
     }
 }

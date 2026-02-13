@@ -88,6 +88,8 @@ jobs:
             extent-report/**
             screenshots/**
           if-no-files-found: warn
+          zip: true
+
 
       ###############################################################
       # Configure Git identity
@@ -159,3 +161,77 @@ jobs:
           else {
             Write-Output "No Excel updates detected - nothing to push."
           }
+      - name: Extract Test Summary
+        if: always()
+        shell: bash
+        run: |
+          FILE="extent-report/OneMAC-TestReport"
+
+          if [ -f "$FILE" ]; then
+            PASSED=$(jq '[.[] | select(.status == "PASS")] | length' "$FILE")
+            FAILED=$(jq '[.[] | select(.status == "FAIL")] | length' "$FILE")
+            SKIPPED=$(jq '[.[] | select(.status == "SKIP")] | length' "$FILE")
+          else
+            PASSED=0
+            FAILED=0
+            SKIPPED=0
+          fi
+
+          echo "PASSED=$PASSED" >> $GITHUB_ENV
+          echo "FAILED=$FAILED" >> $GITHUB_ENV
+          echo "SKIPPED=$SKIPPED" >> $GITHUB_ENV
+
+      - name: Send Extent Report Email
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL }}
+          password: ${{ secrets.APP_PASSWORD }}
+          subject: "OneMAC Automation Report"
+          html_body: |
+            <table width="100%" cellpadding="0" cellspacing="0" 
+                   style="font-family: Arial, Helvetica, sans-serif; max-width:700px; margin:auto; border-collapse:collapse;">
+              <tr>
+                <td style="padding:20px;">
+            
+                  <h2 style="margin-bottom:5px;">OneMAC SMART Automation Report</h2>
+                  <p style="margin-top:0; color:#777;">
+                    Run #${{ github.run_number }} | Branch: ${{ github.ref_name }}
+                  </p>
+            
+                  <table width="100%" cellpadding="10" cellspacing="0" style="margin-top:15px; border-collapse:collapse;">
+                    <tr>
+                      <td align="center" bgcolor="#D5F5E3">
+                        <h2 style="margin:0;">${{ env.PASSED }}</h2>
+                        <p style="margin:0;">Passed</p>
+                      </td>
+                      <td align="center" bgcolor="#FADBD8">
+                        <h2 style="margin:0;">${{ env.FAILED }}</h2>
+                        <p style="margin:0;">Failed</p>
+                      </td>
+                      <td align="center" bgcolor="#FCF3CF">
+                        <h2 style="margin:0;">${{ env.SKIPPED }}</h2>
+                        <p style="margin:0;">Skipped</p>
+                      </td>
+                    </tr>
+                  </table>
+            
+                  <p style="margin-top:25px;">
+                    <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                       style="background:#2E86C1; color:#ffffff; padding:12px 20px; text-decoration:none;">
+                       View Full Report
+                    </a>
+                  </p>
+            
+                  <p style="margin-top:30px; font-size:12px; color:#999;">
+                    Generated automatically by GitHub Actions CI.
+                  </p>
+            
+                </td>
+              </tr>
+            </table>
+          to: amjad.ammar@icf.com
+          from: OneMAC CI
