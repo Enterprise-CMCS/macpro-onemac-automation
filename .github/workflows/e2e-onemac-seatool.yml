@@ -6,7 +6,6 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-# Prevent two workflows from modifying Excel at the same time
 concurrency:
   group: excel-sync
   cancel-in-progress: false
@@ -28,7 +27,7 @@ jobs:
 
     steps:
       ###############################################################
-      # Always check out latest main so Excel is not stale
+      # Checkout
       ###############################################################
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -51,7 +50,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       ###############################################################
-      # Read browser/headless settings from config
+      # Read browser/headless
       ###############################################################
       - name: Read browser + headless from config.properties
         shell: powershell
@@ -77,7 +76,7 @@ jobs:
             "-Duser.timezone=America/New_York"
 
       ###############################################################
-      # Upload report
+      # Upload artifacts
       ###############################################################
       - name: Upload Extent Report & Screenshots
         if: always()
@@ -89,7 +88,6 @@ jobs:
             screenshots/**
           if-no-files-found: warn
           zip: true
-
 
       ###############################################################
       # Configure Git identity
@@ -127,7 +125,7 @@ jobs:
           Write-Output "UPDATED=$updated"
 
       ###############################################################
-      # Commit + Push Excel Updates with rebase
+      # Commit + Push Excel Updates
       ###############################################################
       - name: Commit & Push Excel Updates
         if: always()
@@ -161,26 +159,39 @@ jobs:
           else {
             Write-Output "No Excel updates detected - nothing to push."
           }
+
+      ###############################################################
+      # Extract Test Summary (PowerShell)
+      ###############################################################
       - name: Extract Test Summary
         if: always()
-        shell: bash
+        shell: powershell
         run: |
-          FILE="extent-report/OneMAC-TestReport"
+          $reportFile = "extent-report\OneMAC-TestReport.json"
 
-          if [ -f "$FILE" ]; then
-            PASSED=$(jq '[.[] | select(.status == "PASS")] | length' "$FILE")
-            FAILED=$(jq '[.[] | select(.status == "FAIL")] | length' "$FILE")
-            SKIPPED=$(jq '[.[] | select(.status == "SKIP")] | length' "$FILE")
-          else
-            PASSED=0
-            FAILED=0
-            SKIPPED=0
-          fi
+          if (Test-Path $reportFile) {
+              $json = Get-Content $reportFile | ConvertFrom-Json
 
-          echo "PASSED=$PASSED" >> $GITHUB_ENV
-          echo "FAILED=$FAILED" >> $GITHUB_ENV
-          echo "SKIPPED=$SKIPPED" >> $GITHUB_ENV
+              $PASSED  = ($json | Where-Object { $_.status -eq "PASS" }).Count
+              $FAILED  = ($json | Where-Object { $_.status -eq "FAIL" }).Count
+              $SKIPPED = ($json | Where-Object { $_.status -eq "SKIP" }).Count
+          } else {
+              $PASSED  = 0
+              $FAILED  = 0
+              $SKIPPED = 0
+          }
 
+          Write-Output "PASSED=$PASSED"
+          Write-Output "FAILED=$FAILED"
+          Write-Output "SKIPPED=$SKIPPED"
+
+          Add-Content -Path $env:GITHUB_ENV -Value "PASSED=$PASSED"
+          Add-Content -Path $env:GITHUB_ENV -Value "FAILED=$FAILED"
+          Add-Content -Path $env:GITHUB_ENV -Value "SKIPPED=$SKIPPED"
+
+      ###############################################################
+      # Send Extent Report Email
+      ###############################################################
       - name: Send Extent Report Email
         if: always()
         uses: dawidd6/action-send-mail@v3
@@ -196,12 +207,10 @@ jobs:
                    style="font-family: Arial, Helvetica, sans-serif; max-width:700px; margin:auto; border-collapse:collapse;">
               <tr>
                 <td style="padding:20px;">
-            
                   <h2 style="margin-bottom:5px;">OneMAC SMART Automation Report</h2>
                   <p style="margin-top:0; color:#777;">
                     Run #${{ github.run_number }} | Branch: ${{ github.ref_name }}
                   </p>
-            
                   <table width="100%" cellpadding="10" cellspacing="0" style="margin-top:15px; border-collapse:collapse;">
                     <tr>
                       <td align="center" bgcolor="#D5F5E3">
@@ -218,18 +227,15 @@ jobs:
                       </td>
                     </tr>
                   </table>
-            
                   <p style="margin-top:25px;">
                     <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                        style="background:#2E86C1; color:#ffffff; padding:12px 20px; text-decoration:none;">
                        View Full Report
                     </a>
                   </p>
-            
                   <p style="margin-top:30px; font-size:12px; color:#999;">
                     Generated automatically by GitHub Actions CI.
                   </p>
-            
                 </td>
               </tr>
             </table>
