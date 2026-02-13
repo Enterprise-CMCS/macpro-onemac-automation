@@ -11,18 +11,24 @@ import java.io.IOException;
 public class ExtentReportFinalizer {
 
     public static void main(String[] args) {
-        // Accept base folder path from args or default to "reports"
-        String baseFolder = (args.length > 0) ? args[0] : "reports";
+        // Use "extent-report" as the default base folder
+        String baseFolder = (args.length > 0) ? args[0] : "extent-report";
         String mergedJsonPath = baseFolder + "/OneMACTestReport-merged.json";
         String finalHtmlPath = baseFolder + "/FinalExecutiveReport.html";
 
         try {
-            System.out.println("Starting report consolidation...");
+            System.out.println("Starting report consolidation from base folder: " + baseFolder);
 
-            // Merge JSON files from all subfolders
-            mergeAllJsonInFolder(baseFolder, mergedJsonPath);
+            File baseDir = new File(baseFolder);
+            if (!baseDir.exists() || !baseDir.isDirectory()) {
+                System.err.println("Warning: Base folder does not exist. Creating it for future runs.");
+                baseDir.mkdirs();
+            }
 
-            // Generate HTML from merged JSON
+            // Merge JSON files
+            mergeAllJsonInFolder(baseDir, mergedJsonPath);
+
+            // Generate consolidated HTML report
             generateHtmlFromJson(mergedJsonPath, finalHtmlPath);
 
             System.out.println("=== REPORTING COMPLETE ===");
@@ -36,75 +42,59 @@ public class ExtentReportFinalizer {
         }
     }
 
-    /**
-     * Recursively scans a folder for all JSON files and merges them into one ArrayNode
-     */
-    public static void mergeAllJsonInFolder(String folderPath, String outputPath) throws IOException {
+    // Recursively merge all JSON files in a folder and its subfolders
+    public static void mergeAllJsonInFolder(File folder, String outputPath) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode masterArray = mapper.createArrayNode();
 
-        File dir = new File(folderPath);
-        if (!dir.exists() || !dir.isDirectory()) {
-            throw new IOException("Base folder not found: " + folderPath);
-        }
-
-        // Recursively scan subfolders
-        File[] jsonFiles = dir.listFiles(f -> f.isFile() && f.getName().endsWith(".json"));
-        if (jsonFiles != null) {
-            for (File file : jsonFiles) {
-                System.out.println("Merging JSON: " + file.getAbsolutePath());
-                ArrayNode individualFileNode = (ArrayNode) mapper.readTree(file);
-                masterArray.addAll(individualFileNode);
-            }
-        }
-
-        // Scan subfolders
-        File[] subdirs = dir.listFiles(File::isDirectory);
-        if (subdirs != null) {
-            for (File sub : subdirs) {
-                mergeSubfolderJson(sub, masterArray, mapper);
-            }
-        }
+        mergeFolderRecursive(folder, masterArray, mapper);
 
         mapper.writerWithDefaultPrettyPrinter().writeValue(new File(outputPath), masterArray);
+        System.out.println("Merged JSON written to: " + outputPath);
     }
 
-    private static void mergeSubfolderJson(File folder, ArrayNode masterArray, ObjectMapper mapper) throws IOException {
-        File[] files = folder.listFiles(f -> f.isFile() && f.getName().endsWith(".json"));
-        if (files != null) {
-            for (File file : files) {
+    private static void mergeFolderRecursive(File folder, ArrayNode masterArray, ObjectMapper mapper) throws IOException {
+        if (!folder.exists() || !folder.isDirectory()) return;
+
+        // Merge JSON files in current folder
+        File[] jsonFiles = folder.listFiles(f -> f.isFile() && f.getName().endsWith(".json"));
+        if (jsonFiles != null) {
+            for (File file : jsonFiles) {
                 System.out.println("Merging JSON: " + file.getAbsolutePath());
                 ArrayNode node = (ArrayNode) mapper.readTree(file);
                 masterArray.addAll(node);
             }
         }
 
-        // Recursive for nested folders
-        File[] subdirs = folder.listFiles(File::isDirectory);
-        if (subdirs != null) {
-            for (File sub : subdirs) {
-                mergeSubfolderJson(sub, masterArray, mapper);
+        // Recurse into subfolders
+        File[] subDirs = folder.listFiles(File::isDirectory);
+        if (subDirs != null) {
+            for (File sub : subDirs) {
+                mergeFolderRecursive(sub, masterArray, mapper);
             }
         }
     }
 
-    /**
-     * Generates the Extent Spark HTML report from merged JSON
-     */
+    // Generate HTML report from merged JSON
     public static void generateHtmlFromJson(String jsonInput, String htmlOutput) throws IOException {
+        File sourceJson = new File(jsonInput);
+        if (!sourceJson.exists()) {
+            System.err.println("No JSON files found to generate HTML. Skipping report generation.");
+            return;
+        }
+
         ExtentReports extent = new ExtentReports();
         ExtentSparkReporter spark = new ExtentSparkReporter(htmlOutput);
         spark.config().setReportName("Consolidated Test Execution Report");
         spark.config().setDocumentTitle("OneMAC Final Results");
-
         extent.attachReporter(spark);
 
-        File sourceJson = new File(jsonInput);
-        if (sourceJson.exists()) {
+        try {
             extent.createDomainFromJsonArchive(sourceJson);
             extent.flush();
-        } else {
-            throw new IOException("Merged JSON source not found: " + jsonInput);
+        } catch (Exception e) {
+            System.err.println("Error generating HTML from JSON: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
