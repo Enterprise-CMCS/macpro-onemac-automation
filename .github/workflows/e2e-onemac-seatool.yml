@@ -265,3 +265,40 @@ jobs:
               </table>
             
             </body>
+      ###############################################################
+      # EXCEL SYNC (STATE + PACKAGES)
+      ###############################################################
+      - name: Configure Git
+        if: always()
+        shell: powershell
+        run: |
+          git config user.name "Amjad"
+          git config user.email "jad.ammar.co@gmail.com"
+
+      - name: Stage Excel
+        if: always()
+        shell: powershell
+        run: |
+          $UPDATED = 0
+
+          if (Test-Path "src/test/resources/state_counters.xlsx") {
+            git add src/test/resources/state_counters.xlsx
+            $UPDATED = 1
+          }
+
+          if (Test-Path "src/test/resources/packages.xlsx") {
+            git add src/test/resources/packages.xlsx
+            $UPDATED = 1
+          }
+
+          Add-Content $env:GITHUB_ENV "UPDATED=$UPDATED"
+
+      - name: Commit & Push Excel
+        if: env.UPDATED == '1'
+        shell: powershell
+        run: |
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "CI: Update Excel source-of-truth"
+            git push origin HEAD:main
+          }
