@@ -62,6 +62,7 @@ jobs:
           
           Add-Content -Path $env:GITHUB_ENV -Value "BROWSER=$browser"
           Add-Content -Path $env:GITHUB_ENV -Value "HEADLESS=$headless"
+          Add-Content -Path $env:GITHUB_ENV -Value "RUNON_ENV=$runOn"
 
       ###############################################################
       # Run E2E Suite
