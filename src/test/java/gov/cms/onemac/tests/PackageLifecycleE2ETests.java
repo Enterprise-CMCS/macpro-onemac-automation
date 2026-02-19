@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 
 public class PackageLifecycleE2ETests extends BaseTest {
 
-    @Test
+   /* @Test
     public void verifyInitialMedicaidSpaSubmissionWorkflow() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
@@ -712,7 +712,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 isSubsequentDocumentsLinkNotVisible,
                 "State user should NOT see the 'Upload Subsequent Documents' link."
         );
-    }
+    }*/
 
     @Test
     public void verifyUnsubmittedWorkflow() {

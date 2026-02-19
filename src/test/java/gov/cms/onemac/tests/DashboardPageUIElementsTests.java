@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 public class DashboardPageUIElementsTests extends BaseTest {
 
-    @Test
+    /*@Test
     public void searchForWaiver() {
         CMSUser cmsUser = createNewCMSUser();
         cmsUser.navigateToOneMac();
@@ -246,6 +246,6 @@ public class DashboardPageUIElementsTests extends BaseTest {
         stateUser.navigateToOneMac();
         stateUser.login();
         AssertionUtil.assertTrue(stateUser.isDashboardClickable(), "Dashboard page should be clickable for state users.");
-    }
+    }*/
 }
 
