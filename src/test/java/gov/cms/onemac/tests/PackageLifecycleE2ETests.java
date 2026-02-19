@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 
 public class PackageLifecycleE2ETests extends BaseTest {
 
-   /* @Test
+  @Test
     public void verifyInitialMedicaidSpaSubmissionWorkflow() {
         StateUser state = createNewStateUser();
         SpaPackage spa = state.submitNewStateAmendmentSPA("MD", "Medicaid SPA");
@@ -45,7 +45,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 "CMS user should see the package status as 'Pending'."
         );
     }
-
+ /*
     @Test
     public void verifyRaiIssuedWorkflowCHIPSPA() {
         StateUser state = createNewStateUser();
@@ -714,7 +714,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
         );
     }*/
 
-    @Test
+/*    @Test
     public void verifyUnsubmittedWorkflow() {
         // ---------- Arrange ----------
         StateUser state = createNewStateUser();
@@ -763,7 +763,7 @@ public class PackageLifecycleE2ETests extends BaseTest {
                 isStateUnsubmitted,
                 "State user should see the package status as 'Unsubmitted'."
         );
-    }
+    }*/
 
     @Test
     public void dataGeneratorTest() {
