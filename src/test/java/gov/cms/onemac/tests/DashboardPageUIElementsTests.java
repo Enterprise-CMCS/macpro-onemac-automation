@@ -1,11 +1,17 @@
 package gov.cms.onemac.tests;
 
 import gov.cms.onemac.base.BaseTest;
+import gov.cms.onemac.flows.CMSUser;
+import gov.cms.onemac.flows.StateUser;
+import gov.cms.onemac.models.SpaPackage;
+import gov.cms.onemac.models.WaiverPackage;
+import gov.cms.onemac.utils.AssertionUtil;
+import gov.cms.onemac.utils.ExcelPackageSelector;
+import gov.cms.onemac.utils.PageFactory;
 import org.testng.annotations.Test;
 
 public class DashboardPageUIElementsTests extends BaseTest {
 
-/*
     @Test
     public void searchForWaiver() {
         CMSUser cmsUser = createNewCMSUser();
@@ -240,6 +246,6 @@ public class DashboardPageUIElementsTests extends BaseTest {
         stateUser.navigateToOneMac();
         stateUser.login();
         AssertionUtil.assertTrue(stateUser.isDashboardClickable(), "Dashboard page should be clickable for state users.");
-    }*/
+    }
 }
 

@@ -154,8 +154,8 @@ jobs:
           secure: true
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.APP_PASSWORD }}
-          subject: "OneMAC Automation Report"
-          to: Amjad.Ammar@icf.com
+          subject: "OneMAC Automation Test Report"
+          to: Amjad.Ammar@icf.com, Nagaraju.Krishna@icf.com
           from: OneMAC CI
           html_body: |
             <body style="margin:0; padding:0; font-family:Segoe UI, Arial; background:#f5f7fb;">
@@ -170,7 +170,7 @@ jobs:
                       <!-- HEADER -->
                       <tr>
                         <td style="background:#1f3a5f; color:white; padding:20px; border-radius:8px 8px 0 0;">
-                          <h2 style="margin:0;">OneMAC Automation</h2>
+                          <h2 style="margin:0;">OneMAC Automation Test Report</h2>
                         </td>
                       </tr>
             
