@@ -56,9 +56,10 @@ jobs:
         shell: powershell
         run: |
           $configPath = "src/test/resources/config.properties"
+          
           $browser = (Select-String -Path $configPath -Pattern "browser\s*=").ToString().Split("=")[1].Trim()
           $headless = (Select-String -Path $configPath -Pattern "headless\s*=").ToString().Split("=")[1].Trim()
-
+          
           Add-Content -Path $env:GITHUB_ENV -Value "BROWSER=$browser"
           Add-Content -Path $env:GITHUB_ENV -Value "HEADLESS=$headless"
 
@@ -87,7 +88,6 @@ jobs:
             extent-report/**
             screenshots/**
           if-no-files-found: warn
-          zip: true
 
       ###############################################################
       # Configure Git identity
@@ -98,7 +98,6 @@ jobs:
         run: |
           git config user.name "Amjad"
           git config user.email "jad.ammar.co@gmail.com"
-          Write-Output "Git identity configured."
 
       ###############################################################
       # Stage updated Excel files
@@ -108,21 +107,18 @@ jobs:
         shell: powershell
         run: |
           $updated = 0
-
+          
           if (Test-Path "src/test/resources/state_counters.xlsx") {
             git add "src/test/resources/state_counters.xlsx"
-            Write-Output "Staged state_counters.xlsx"
             $updated = 1
           }
-
+          
           if (Test-Path "src/test/resources/packages.xlsx") {
             git add "src/test/resources/packages.xlsx"
-            Write-Output "Staged packages.xlsx"
             $updated = 1
           }
-
+          
           Add-Content -Path $env:GITHUB_ENV -Value "UPDATED=$updated"
-          Write-Output "UPDATED=$updated"
 
       ###############################################################
       # Commit + Push Excel Updates
@@ -131,47 +127,29 @@ jobs:
         if: always()
         shell: powershell
         run: |
-          Write-Output "=== Commit Stage Starting ==="
-          Write-Output "UPDATED=$env:UPDATED"
-
           if ($env:UPDATED -eq "1") {
-
+          
             if (-not (git diff --cached --quiet)) {
-
-              Write-Output "Committing Excel updates..."
-              git commit -m 'CI: Update Excel counters (state_counters + packages)'
-
-              Write-Output "Fetching latest main..."
+          
+              git commit -m "CI: Update Excel counters (state_counters + packages)"
+          
               git fetch origin main
-
-              Write-Output "Rebasing onto latest main..."
               git pull origin main --rebase
-
-              Write-Output "Pushing Excel updates..."
               git push origin HEAD:main
-
-              Write-Output "Excel update push completed successfully."
             }
-            else {
-              Write-Output "No staged Excel changes - skipping commit."
-            }
-          }
-          else {
-            Write-Output "No Excel updates detected - nothing to push."
           }
 
       ###############################################################
-      # Extract Test Summary (PowerShell)
+      # Extract Test Summary
       ###############################################################
       - name: Extract Test Summary
         if: always()
         shell: powershell
         run: |
           $reportFile = "extent-report\OneMAC-TestReport.json"
-
+          
           if (Test-Path $reportFile) {
               $json = Get-Content $reportFile | ConvertFrom-Json
-
               $PASSED  = ($json | Where-Object { $_.status -eq "PASS" }).Count
               $FAILED  = ($json | Where-Object { $_.status -eq "FAIL" }).Count
               $SKIPPED = ($json | Where-Object { $_.status -eq "SKIP" }).Count
@@ -180,14 +158,23 @@ jobs:
               $FAILED  = 0
               $SKIPPED = 0
           }
-
-          Write-Output "PASSED=$PASSED"
-          Write-Output "FAILED=$FAILED"
-          Write-Output "SKIPPED=$SKIPPED"
-
+          
+          $TOTAL = $PASSED + $FAILED + $SKIPPED
+          
+          if ($TOTAL -gt 0) {
+              $PASS_RATE = [math]::Round(($PASSED / $TOTAL) * 100, 2)
+          } else {
+              $PASS_RATE = 0
+          }
+          
+          $RUNON_ENV = "$env:RUNNER_NAME"
+          
           Add-Content -Path $env:GITHUB_ENV -Value "PASSED=$PASSED"
           Add-Content -Path $env:GITHUB_ENV -Value "FAILED=$FAILED"
           Add-Content -Path $env:GITHUB_ENV -Value "SKIPPED=$SKIPPED"
+          Add-Content -Path $env:GITHUB_ENV -Value "TOTAL=$TOTAL"
+          Add-Content -Path $env:GITHUB_ENV -Value "PASS_RATE=$PASS_RATE"
+          Add-Content -Path $env:GITHUB_ENV -Value "RUNON_ENV=$RUNON_ENV"
 
       ###############################################################
       # Send Extent Report Email
@@ -202,113 +189,51 @@ jobs:
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.APP_PASSWORD }}
           subject: "OneMAC Automation Report"
-        to: Amjad.Ammar@icf.com
-        from: OneMAC CI
-        html_body: |
-          <body style="margin:0; padding:0; font-family:Segoe UI, Arial; background:#f5f7fb;">
-
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7fb; padding:20px;">
-              <tr>
-                <td align="center">
-
-                  <table width="700" cellpadding="0" cellspacing="0" 
-                         style="background:#ffffff; border-radius:8px;">
-
-                    <!-- HEADER -->
-                    <tr>
-                      <td style="background:#1f3a5f; color:white; padding:20px; border-radius:8px 8px 0 0;">
-                        <h2 style="margin:0;">OneMAC Automation</h2>
-                      </td>
-                    </tr>
-
-                    <!-- SUMMARY -->
-                    <tr>
-                      <td style="padding:20px;">
-                        <table width="100%" cellpadding="10" cellspacing="0">
-                          <tr>
-
-                            <td align="center" style="background:#eafaf1; border-radius:6px;">
-                              <h2 style="color:#27ae60; margin:0;">${{ env.PASSED }}</h2>
-                              <p style="margin:0;">Passed</p>
-                            </td>
-
-                            <td align="center" style="background:#fdecea; border-radius:6px;">
-                              <h2 style="color:#e74c3c; margin:0;">${{ env.FAILED }}</h2>
-                              <p style="margin:0;">Failed</p>
-                            </td>
-
-                            <td align="center" style="background:#fff8e1; border-radius:6px;">
-                              <h2 style="color:#f39c12; margin:0;">${{ env.SKIPPED }}</h2>
-                              <p style="margin:0;">Skipped</p>
-                            </td>
-
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-
-                    <!-- PASS RATE -->
-                    <tr>
-                      <td style="padding:0 20px 20px 20px;">
-                        <table width="100%" cellpadding="15" cellspacing="0"
-                               style="background:#f0f4ff; border-radius:6px;">
-                          <tr>
-                            <td align="center">
-                              <h1 style="margin:0; color:#2E86C1;">
-                                ${{ env.PASS_RATE }}%
-                              </h1>
-                              <p style="margin:0;">Overall Pass Rate</p>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-
-                    <!-- DETAILS -->
-                    <tr>
-                      <td style="padding:0 20px 20px 20px;">
-                        <table width="100%" cellpadding="8" cellspacing="0"
-                               style="border:1px solid #e5e7eb; border-collapse:collapse;">
-                          <tr>
-                            <td style="padding:8px; font-weight:bold;">Total Tests:</td>
-                            <td style="padding:8px;">${{ env.TOTAL }}</td>
-                          </tr>
-
-                          <tr>
-                            <td style="padding:8px; font-weight:bold;">Environment:</td>
-                            <td style="padding:8px;">${{ env.RUNON_ENV }}</td>
-                          </tr>
-
-                          <tr>
-                            <td style="padding:8px; font-weight:bold;">Repository:</td>
-                            <td style="padding:8px;">${{ github.repository }}</td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-
-                    <!-- BUTTON -->
-                    <tr>
-                      <td align="center" style="padding:20px;">
-                        <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                           style="background:#2E86C1; color:white; padding:12px 25px; 
-                                  text-decoration:none; border-radius:5px;">
-                           View Full Report
-                        </a>
-                      </td>
-                    </tr>
-
-                    <!-- FOOTER -->
-                    <tr>
-                      <td align="center" style="font-size:12px; color:#999; padding:15px;">
-                        Generated automatically by GitHub Actions CI.
-                      </td>
-                    </tr>
-
-                  </table>
-
-                </td>
-              </tr>
-            </table>
-
-          </body>
+          to: Amjad.Ammar@icf.com
+          from: OneMAC CI
+          html_body: |
+            <body style="margin:0; padding:0; font-family:Segoe UI, Arial; background:#f5f7fb;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7fb; padding:20px;">
+                <tr>
+                  <td align="center">
+                    <table width="700" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px;">
+            
+                      <tr>
+                        <td style="background:#1f3a5f; color:white; padding:20px;">
+                          <h2 style="margin:0;">OneMAC Automation Report</h2>
+                        </td>
+                      </tr>
+            
+                      <tr>
+                        <td style="padding:20px;">
+                          <h3>Summary</h3>
+                          <p><b>Passed:</b> ${{ env.PASSED }}</p>
+                          <p><b>Failed:</b> ${{ env.FAILED }}</p>
+                          <p><b>Skipped:</b> ${{ env.SKIPPED }}</p>
+                          <p><b>Total:</b> ${{ env.TOTAL }}</p>
+                          <p><b>Pass Rate:</b> ${{ env.PASS_RATE }}%</p>
+                          <p><b>Runner:</b> ${{ env.RUNON_ENV }}</p>
+                          <p><b>Repository:</b> ${{ github.repository }}</p>
+                        </td>
+                      </tr>
+            
+                      <tr>
+                        <td align="center" style="padding:20px;">
+                          <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                             style="background:#2E86C1; color:white; padding:12px 25px; text-decoration:none; border-radius:5px;">
+                             View Full Report
+                          </a>
+                        </td>
+                      </tr>
+            
+                      <tr>
+                        <td align="center" style="font-size:12px; color:#999; padding:15px;">
+                          Generated automatically by GitHub Actions CI.
+                        </td>
+                      </tr>
+            
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
