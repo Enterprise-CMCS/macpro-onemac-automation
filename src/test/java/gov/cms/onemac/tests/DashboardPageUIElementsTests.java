@@ -5,12 +5,6 @@ import org.testng.annotations.Test;
 
 public class DashboardPageUIElementsTests extends BaseTest {
 
-
-    @Test
-    public void test() {
-        System.out.println("Test");
-    }
-
 /*
     @Test
     public void searchForWaiver() {

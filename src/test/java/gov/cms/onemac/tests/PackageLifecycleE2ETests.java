@@ -1,18 +1,18 @@
 package gov.cms.onemac.tests;
 
 import gov.cms.onemac.base.BaseTest;
-import gov.cms.onemac.flows.CMSUser;
-import gov.cms.onemac.flows.SeaUser;
 import gov.cms.onemac.flows.StateUser;
-import gov.cms.onemac.models.SpaPackage;
-import gov.cms.onemac.utils.AssertionUtil;
-import gov.cms.onemac.utils.ExcelPackageTracker;
 import org.testng.annotations.Test;
 
 
 public class PackageLifecycleE2ETests extends BaseTest {
 
-
+    @Test
+    public void test() {
+        StateUser stateUser = createNewStateUser();
+        stateUser.navigateToOneMac();
+        stateUser.login();
+    }
    /* @Test
     public void verifyInitialMedicaidSpaSubmissionWorkflow() {
         StateUser state = createNewStateUser();
