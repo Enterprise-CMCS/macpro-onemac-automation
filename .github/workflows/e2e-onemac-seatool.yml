@@ -174,7 +174,7 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "SKIPPED=$SKIPPED"
           Add-Content -Path $env:GITHUB_ENV -Value "TOTAL=$TOTAL"
           Add-Content -Path $env:GITHUB_ENV -Value "PASS_RATE=$PASS_RATE"
-          Add-Content -Path $env:GITHUB_ENV -Value "RUNON_ENV=$RUNON_ENV"
+          Add-Content -Path $env:GITHUB_ENV -Value "RUNON_ENV=$runOn"
 
       ###############################################################
       # Send Extent Report Email
