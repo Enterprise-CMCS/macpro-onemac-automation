@@ -11,7 +11,6 @@ public class PackageLifecycleE2ETests extends BaseTest {
     public void test() {
         StateUser stateUser = createNewStateUser();
         stateUser.navigateToOneMac();
-        stateUser.login();
     }
    /* @Test
     public void verifyInitialMedicaidSpaSubmissionWorkflow() {
