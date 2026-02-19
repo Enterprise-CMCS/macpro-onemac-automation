@@ -155,7 +155,7 @@ jobs:
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.APP_PASSWORD }}
           subject: "OneMAC Automation Test Report"
-          to: Amjad.Ammar@icf.com, Nagaraju.Krishna@icf.com
+          to: Amjad.Ammar@icf.com
           from: OneMAC CI
           html_body: |
             <body style="margin:0; padding:0; font-family:Segoe UI, Arial; background:#f5f7fb;">
