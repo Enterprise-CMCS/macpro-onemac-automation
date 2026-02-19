@@ -50,15 +50,33 @@ jobs:
             ${{ runner.os }}-maven-
 
       ###############################################################
-      # Read browser/headless
+      # Read config values (browser, headless, runOn)
       ###############################################################
-      - name: Read browser + headless from config.properties
+      - name: Read config values
         shell: powershell
         run: |
           $configPath = "src/test/resources/config.properties"
           
-          $browser = (Select-String -Path $configPath -Pattern "browser\s*=").ToString().Split("=")[1].Trim()
-          $headless = (Select-String -Path $configPath -Pattern "headless\s*=").ToString().Split("=")[1].Trim()
+          if (-not (Test-Path $configPath)) {
+            Write-Error "config.properties not found!"
+            exit 1
+          }
+          
+          $config = Get-Content $configPath
+          
+          function Get-Prop($key) {
+            $line = $config | Where-Object { $_ -match "^\s*$key\s*=" }
+            if ($line) {
+              return ($line -replace "^\s*$key\s*=\s*", "").Trim()
+            } else {
+              Write-Error "Property '$key' not found in config.properties"
+              exit 1
+            }
+          }
+          
+          $browser  = Get-Prop "browser"
+          $headless = Get-Prop "headless"
+          $runOn    = Get-Prop "runOn"
           
           Add-Content -Path $env:GITHUB_ENV -Value "BROWSER=$browser"
           Add-Content -Path $env:GITHUB_ENV -Value "HEADLESS=$headless"
@@ -91,56 +109,6 @@ jobs:
           if-no-files-found: warn
 
       ###############################################################
-      # Configure Git identity
-      ###############################################################
-      - name: Configure Git Identity
-        if: always()
-        shell: powershell
-        run: |
-          git config user.name "Amjad"
-          git config user.email "jad.ammar.co@gmail.com"
-
-      ###############################################################
-      # Stage updated Excel files
-      ###############################################################
-      - name: Stage updated Excel files
-        if: always()
-        shell: powershell
-        run: |
-          $updated = 0
-          
-          if (Test-Path "src/test/resources/state_counters.xlsx") {
-            git add "src/test/resources/state_counters.xlsx"
-            $updated = 1
-          }
-          
-          if (Test-Path "src/test/resources/packages.xlsx") {
-            git add "src/test/resources/packages.xlsx"
-            $updated = 1
-          }
-          
-          Add-Content -Path $env:GITHUB_ENV -Value "UPDATED=$updated"
-
-      ###############################################################
-      # Commit + Push Excel Updates
-      ###############################################################
-      - name: Commit & Push Excel Updates
-        if: always()
-        shell: powershell
-        run: |
-          if ($env:UPDATED -eq "1") {
-          
-            if (-not (git diff --cached --quiet)) {
-          
-              git commit -m "CI: Update Excel counters (state_counters + packages)"
-          
-              git fetch origin main
-              git pull origin main --rebase
-              git push origin HEAD:main
-            }
-          }
-
-      ###############################################################
       # Extract Test Summary
       ###############################################################
       - name: Extract Test Summary
@@ -150,32 +118,29 @@ jobs:
           $reportFile = "extent-report\OneMAC-TestReport.json"
           
           if (Test-Path $reportFile) {
-              $json = Get-Content $reportFile | ConvertFrom-Json
-              $PASSED  = ($json | Where-Object { $_.status -eq "PASS" }).Count
-              $FAILED  = ($json | Where-Object { $_.status -eq "FAIL" }).Count
-              $SKIPPED = ($json | Where-Object { $_.status -eq "SKIP" }).Count
+            $json = Get-Content $reportFile | ConvertFrom-Json
+            $PASSED  = ($json | Where-Object { $_.status -eq "PASS" }).Count
+            $FAILED  = ($json | Where-Object { $_.status -eq "FAIL" }).Count
+            $SKIPPED = ($json | Where-Object { $_.status -eq "SKIP" }).Count
           } else {
-              $PASSED  = 0
-              $FAILED  = 0
-              $SKIPPED = 0
+            $PASSED  = 0
+            $FAILED  = 0
+            $SKIPPED = 0
           }
           
           $TOTAL = $PASSED + $FAILED + $SKIPPED
           
           if ($TOTAL -gt 0) {
-              $PASS_RATE = [math]::Round(($PASSED / $TOTAL) * 100, 2)
+            $PASS_RATE = [math]::Round(($PASSED / $TOTAL) * 100, 2)
           } else {
-              $PASS_RATE = 0
+            $PASS_RATE = 0
           }
-          
-          $RUNON_ENV = "$env:RUNNER_NAME"
           
           Add-Content -Path $env:GITHUB_ENV -Value "PASSED=$PASSED"
           Add-Content -Path $env:GITHUB_ENV -Value "FAILED=$FAILED"
           Add-Content -Path $env:GITHUB_ENV -Value "SKIPPED=$SKIPPED"
           Add-Content -Path $env:GITHUB_ENV -Value "TOTAL=$TOTAL"
           Add-Content -Path $env:GITHUB_ENV -Value "PASS_RATE=$PASS_RATE"
-          Add-Content -Path $env:GITHUB_ENV -Value "RUNON_ENV=$runOn"
 
       ###############################################################
       # Send Extent Report Email
@@ -209,7 +174,7 @@ jobs:
                         </td>
                       </tr>
             
-                      <!-- SUMMARY -->
+                      <!-- SUMMARY CARDS -->
                       <tr>
                         <td style="padding:20px;">
                           <table width="100%" cellpadding="10" cellspacing="0">
